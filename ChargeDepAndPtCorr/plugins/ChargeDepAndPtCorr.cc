@@ -9,8 +9,8 @@
      [Notes on implementation]
 */
 //
-//          Author:  Prabhat Pujahari 
-//         Created:  Thu, 01 Jun 2017 16:56:11 GMT
+//          Author:  Maxime & Prabhat  
+//         Created:  Thu, 01 Feb 2017 16:56:11 GMT
 //
 //This code is doing the calculation using DeltaVz method 2.
 
