@@ -12,8 +12,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10
 # Configure the number of maximum event the analyser run on in interactive mode
 # -1 == ALL
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(-1) 
-    #input = cms.untracked.int32(1) 
+    #input = cms.untracked.int32(-1) 
+    input = cms.untracked.int32(10) 
 )
 
 

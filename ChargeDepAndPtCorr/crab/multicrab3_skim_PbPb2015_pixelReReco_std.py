@@ -9,19 +9,20 @@ if __name__ == '__main__':
     from CRABClient.UserUtilities import config, getUsernameFromSiteDB
     config = config()
 
-    config.General.workArea = 'ChargeDepPtCorr_PbPb_pixelReReco'
+    config.General.workArea = 'MCGen_PbPb_HYDJet_Octb02_ChMP'
     config.General.transferOutputs = True
     config.General.transferLogs = False
     config.JobType.pluginName = 'Analysis'
-#    config.JobType.maxMemoryMB = 3000
+    #config.JobType.maxMemoryMB = 2500
     config.JobType.psetName = '../cfg/chargedepptcorr_base_cfg.py'
-    config.Data.unitsPerJob = 50
+    config.Data.unitsPerJob = 40 #20 is good
     config.Data.totalUnits = -1
     config.Data.inputDBS = 'global'
     config.Data.splitting = 'LumiBased'
-    config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
+    #config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
+    config.Data.outLFNDirBase = '/store/user/prabhat/'
     config.Data.publication = False
-    config.Site.storageSite = 'T2_CH_CERN'
+    config.Site.storageSite = 'T2_IN_TIFR'
 
     def submit(config):
         try:
@@ -38,59 +39,76 @@ if __name__ == '__main__':
     ###############################
     #    Standard analysis        #
     ###############################
+    
     ##### Central events 0-10% ####
+
+    ## config parameters for central v1
+    #config.JobType.maxMemoryMB = 3000 
+
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_central_v1'
     config.JobType.psetName = '../cfg/chargedepptcorr_central_cfg.py'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_262548-263757_PromptReco_HICollisions15_JSON_v2.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_central_v1'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_central_Jun07_ChMP_v1'
     submit(config)
+
+    ## config parameters for central v2
+    #config.JobType.maxMemoryMB = 4000
 
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_central_v2'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_263685-263757_PromptReco_HICollisions15_TrackerOnly_JSON.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_central_v2'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_central_Jun07_ChMP_v2'
     submit(config)
 
-    ##### Mid-central events 10-30% ####
+    ## config parameters for midcentral v1
+    #config.JobType.maxMemoryMB = 3000
+
+    ##### Midcentral events 10-30% ####
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_midcentral_v1'
     config.JobType.psetName = '../cfg/chargedepptcorr_midcentral_cfg.py'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_262548-263757_PromptReco_HICollisions15_JSON_v2.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midcentral_v1'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midcentral_Jun07_ChMP_v1'
     submit(config)
+
+    ## config parameters for midcentral v2
+    #config.JobType.maxMemoryMB = 4000
 
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_midcentral_v2'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_263685-263757_PromptReco_HICollisions15_TrackerOnly_JSON.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midcentral_v2'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midcentral_Jun07_ChMP_v2'
     submit(config)
 
-    ##### Mid-peripheral events 30-50% ####
+
+    ## config parameters for midperipheral and midperipheral
+    #config.JobType.maxMemoryMB = 2500
+
+    ##### Midperipheral events 30-50% ####
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_midperipheral_v1'
     config.JobType.psetName = '../cfg/chargedepptcorr_midperipheral_cfg.py'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_262548-263757_PromptReco_HICollisions15_JSON_v2.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midperipheral_v1'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midperipheral_Jun07_ChMP_v1'
     submit(config)
 
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_midperipheral_v2'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_263685-263757_PromptReco_HICollisions15_TrackerOnly_JSON.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midperipheral_v2'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_midperipheral_Jun07_ChMP_v2'
     submit(config)
 
-    ##### Peripheral events 50-90% ####
+    ##### Peripheral events 50-100% ####
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_peripheral_v1'
     config.JobType.psetName = '../cfg/chargedepptcorr_peripheral_cfg.py'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_262548-263757_PromptReco_HICollisions15_JSON_v2.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_peripheral_v1'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_peripheral_Jun07_ChMP_v1'
     submit(config)
 
     config.General.requestName = 'PbPb2015_pixelReReco_chgdepcorr_std_peripheral_v2'
     config.Data.inputDataset = '/HIMinimumBias2/HIRun2015-25Aug2016-v1/AOD'
     config.Data.lumiMask = '../data/JSON/Cert_263685-263757_PromptReco_HICollisions15_TrackerOnly_JSON.txt'
-    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_peripheral_v2'
+    config.Data.outputDatasetTag = 'Historgram_chgepcorr_PbPb2015_pixelReReco_std_peripheral_Jun07_ChMP_v2'
     submit(config)
-

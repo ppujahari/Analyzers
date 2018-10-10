@@ -11,10 +11,12 @@ class DiHadronCorrelationEvt {
    std::vector<double>                    nMultCorrVect_trg;
    std::vector< std:: vector<double> >    chgVect_trg;
    std::vector< std:: vector<double> >    effVect_trg;
+   std::vector< std:: vector<double> >    phiWVect_trg;
    std::vector< std:: vector<TLorentzVector> >  pVect_ass;
    std::vector<double>                    nMultCorrVect_ass;
    std::vector< std:: vector<double> >    chgVect_ass;
    std::vector< std:: vector<double> >    effVect_ass;
+   std::vector< std:: vector<double> >    phiWVect_ass;
    int    run;
    int    event;
    double zvtx;
@@ -32,11 +34,14 @@ class DiHadronCorrelationEvt {
      nMultCorrVect_trg.resize(10); 
      chgVect_trg.resize(10);
      effVect_trg.resize(10);
+     phiWVect_trg.resize(10);
 
      pVect_ass.resize(10); 
      nMultCorrVect_ass.resize(10); 
      chgVect_ass.resize(10);
      effVect_ass.resize(10);
+     phiWVect_ass.resize(10);
+   
    }
 
    DiHadronCorrelationEvt(unsigned int size_trg, unsigned int size_ass)
@@ -45,11 +50,14 @@ class DiHadronCorrelationEvt {
      nMultCorrVect_trg.resize(size_trg); 
      chgVect_trg.resize(size_trg);
      effVect_trg.resize(size_trg);
+     phiWVect_trg.resize(size_trg);
 
      pVect_ass.resize(size_ass); 
      nMultCorrVect_ass.resize(size_ass); 
      chgVect_ass.resize(size_ass);
      effVect_ass.resize(size_ass);
+     phiWVect_ass.resize(size_ass);
+
    }
 
    ~DiHadronCorrelationEvt()
@@ -58,19 +66,25 @@ class DiHadronCorrelationEvt {
      nMultCorrVect_trg.clear(); 
      chgVect_trg.clear();
      effVect_trg.clear();
+     phiWVect_trg.clear();
+     
      std::vector< std:: vector<TLorentzVector> >().swap(pVect_trg); 
      std::vector<double>().swap(nMultCorrVect_trg); 
      std::vector< std:: vector<double> >().swap(chgVect_trg);
      std::vector< std:: vector<double> >().swap(effVect_trg);
+     std::vector< std:: vector<double> >().swap(phiWVect_trg);
 
      pVect_ass.clear(); 
      nMultCorrVect_ass.clear(); 
      chgVect_ass.clear();
      effVect_ass.clear();
+     phiWVect_ass.clear();
+     
      std::vector< std:: vector<TLorentzVector> >().swap(pVect_ass); 
      std::vector<double>().swap(nMultCorrVect_ass); 
      std::vector< std:: vector<double> >().swap(chgVect_ass);
      std::vector< std:: vector<double> >().swap(effVect_ass);
+     std::vector< std:: vector<double> >().swap(phiWVect_ass);
    }
 
    void reset()
@@ -97,6 +111,11 @@ class DiHadronCorrelationEvt {
      std::vector< std:: vector<double> >().swap(effVect_trg);
      effVect_trg.resize(size);
 
+     size = phiWVect_trg.size();
+     phiWVect_trg.clear();
+     std::vector< std:: vector<double> >().swap(phiWVect_trg);
+     phiWVect_trg.resize(size);
+
      size = pVect_ass.size();
      pVect_ass.clear();
      std::vector< std:: vector<TLorentzVector> >().swap(pVect_ass);
@@ -116,6 +135,11 @@ class DiHadronCorrelationEvt {
      effVect_ass.clear();
      std::vector< std:: vector<double> >().swap(effVect_ass);
      effVect_ass.resize(size);
+
+     size = phiWVect_ass.size();
+     phiWVect_ass.clear();
+     std::vector< std:: vector<double> >().swap(phiWVect_ass);
+     phiWVect_ass.resize(size);
 
      run   = -999;
      event = -999;

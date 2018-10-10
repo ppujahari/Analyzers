@@ -20,9 +20,11 @@ process.maxEvents = cms.untracked.PSet(
 # __________________ I/O files _________________
 
 # Define the input file to run on in interactive mode
+#Simulation file
+
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2015/HIMinimumBias2/AOD/25Aug2016-v1/90000/34CD034C-ED6F-E611-A55F-44A842124E15.root'
+        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
     )
 )
 
@@ -71,24 +73,18 @@ process.clusterCompatibilityFilter.clusterTrunc = cms.double(2.0)
 
 # Load you analyzer with initial configuration
 process.load("Analyzers.ChargeDepAndPtCorr.chargedepptcorr_cff")
-process.defaultAnalysis_5055 = process.CPDC5055.clone()
-process.defaultAnalysis_5560 = process.CPDC5560.clone()
-process.defaultAnalysis_6065 = process.CPDC6065.clone()
-process.defaultAnalysis_6570 = process.CPDC6570.clone()
+#process.defaultAnalysis_5055 = process.CPDC5055.clone()
+#process.defaultAnalysis_5560 = process.CPDC5560.clone()
+#process.defaultAnalysis_6065 = process.CPDC6065.clone()
+#process.defaultAnalysis_6570 = process.CPDC6570.clone()
 process.defaultAnalysis_7075 = process.CPDC7075.clone()
-process.defaultAnalysis_7580 = process.CPDC7580.clone()
-process.defaultAnalysis_8085 = process.CPDC8085.clone()
-process.defaultAnalysis_8590 = process.CPDC8590.clone()
+#process.defaultAnalysis_7580 = process.CPDC7580.clone()
+#process.defaultAnalysis_8085 = process.CPDC8085.clone()
+#process.defaultAnalysis_8590 = process.CPDC8590.clone()
 process.p = cms.Path(process.hfCoincFilter3 *             # Requier HF coincidence with 3 GeV  
                      process.primaryVertexFilter *        # Clean up on vertices
                      process.clusterCompatibilityFilter * # Clean up on pileup
                      process.centralityBin *              # Compute centrality
                      process.hltMB *                      # Select MB events
-                     process.defaultAnalysis_5055 *       
-                     process.defaultAnalysis_5560 *       
-                     process.defaultAnalysis_6065 *       
-                     process.defaultAnalysis_6570 *       
-                     process.defaultAnalysis_7075 *       
-                     process.defaultAnalysis_7580 *       
-                     process.defaultAnalysis_8085 *       
-                     process.defaultAnalysis_8590)        # Run the analyzer
+                     process.defaultAnalysis_7075)
+                     

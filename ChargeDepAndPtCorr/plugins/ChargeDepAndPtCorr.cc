@@ -4,17 +4,15 @@
 // Class:      ChargeDepAndPtCorr
 // 
 /**\class ChargeDepAndPtCorr ChargeDepAndPtCorr.cc Analyzers/ChargeDepAndPtCorr/plugins/ChargeDepAndPtCorr.cc
-
  Description: [one line class summary]
-
  Implementation:
      [Notes on implementation]
 */
 //
-// Original Author:  Maxime Guilbaud
+// Original Author:  Maxime & Prabhat 
 //         Created:  Thu, 01 Jun 2017 16:56:11 GMT
 //
-//
+//This code is doing the calculation using DeltaVz method 2.
 
 // system include files
 
@@ -78,6 +76,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
   dzdzerror_pix_(iConfig.getUntrackedParameter<double>("dzdzerror_pix")),
   nhitsmin_(iConfig.getUntrackedParameter<int>("nhitsmin")),
   algo_(iConfig.getUntrackedParameter< std::vector<int> >("algo")),
+  chi2nmax_(iConfig.getUntrackedParameter<double>("chi2nmax")),
   //Mixing
   bkgFactor_(iConfig.getUntrackedParameter<unsigned int>("bkgFactor")),
   //Histogram binning
@@ -113,27 +112,36 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
    edm::Service<TFileService> fs;
    // Histograms
    TFileDirectory fVtxHist  = fs->mkdir("Vertex");
+   /*
    hXBestVtx_   = fVtxHist.make<TH1F>("hXvtx", "", 80,   -0.4, 0.4);
    hYBestVtx_   = fVtxHist.make<TH1F>("hYvtx", "", 80,   -0.4, 0.4);
    hRhoBestVtx_ = fVtxHist.make<TH1F>("hRvtx", "", 600,   0, 0.6);
    hZBestVtx_   = fVtxHist.make<TH1F>("hZvtx", "", 600, -30., 30.);
    hNVtx_       = fVtxHist.make<TH1I>("hnVtx", "", 100, 0, 100);
+   */
    TFileDirectory fGlobalHist  = fs->mkdir("Global");
-   hCent_          = fGlobalHist.make<TH1I>("hCent", "",  200, 0, 200);
-   hNoff_          = fGlobalHist.make<TH1I>("hNoff", "p_{T} > 0.4 GeV/c", 1000, 0, 1000);
+   //hCent_          = fGlobalHist.make<TH1I>("hCent", "",  200, 0, 200);
+   hCounts_          = fGlobalHist.make<TH1I>("hCent", "",  2, 0, 2);
+   //hNoff_          = fGlobalHist.make<TH1I>("hNoff", "p_{T} > 0.4 GeV/c", 1000, 0, 1000);*/
    hMult_trg_      = fGlobalHist.make<TH1I>("hMult_trg", 
                                             Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]), 
-                                            1000, 0, 50000);
-   hMult_corr_trg_ = fGlobalHist.make<TH1F>("hMultcorr_trg",
+                                            200, 0, 2000);
+   
+   /*hMult_corr_trg_ = fGlobalHist.make<TH1F>("hMultcorr_trg",
                                             Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]), 
-                                            1000, 0, 50000);
+					    1000, 0, 50000);*/
    hMult_ass_      = fGlobalHist.make<TH1I>("hMult_ass", 
                                             Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]), 
-                                            1000, 0, 50000);
+                                            200, 0, 2000);/*
    hMult_corr_ass_ = fGlobalHist.make<TH1F>("hMultcorr_ass",
                                             Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]), 
                                             1000, 0, 50000);
+
+                                            */
+   hPhidist_ = fGlobalHist.make<TH1F>("hPhidist", "", 640, -3.2,  3.2);
+
    TFileDirectory fTrkTrgHist  = fs->mkdir("TrgTracksRaw");
+   /*
    hEtaTrk_trg_.resize(pTmin_trg_.size()); 
    hPtTrk_trg_.resize(pTmin_trg_.size()); 
    hPhiTrk_trg_.resize(pTmin_trg_.size()); 
@@ -156,7 +164,9 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                                                  Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
                                                  1000, 0, 50000);
    }
+   */
    TFileDirectory fTrkCorrTrgHist  = fs->mkdir("TrgTracksCorr");
+   /*
    hEtaTrk_corr_trg_.resize(pTmin_trg_.size()); 
    hPtTrk_corr_trg_.resize(pTmin_trg_.size()); 
    hPhiTrk_corr_trg_.resize(pTmin_trg_.size()); 
@@ -179,7 +189,9 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                                                  Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
                                                  1000, 0, 50000);
    }
+   */
    TFileDirectory fTrkAssHist  = fs->mkdir("AssTracksRaw");
+   /*
    hEtaTrk_ass_.resize(pTmin_ass_.size()); 
    hPtTrk_ass_.resize(pTmin_ass_.size()); 
    hPhiTrk_ass_.resize(pTmin_ass_.size()); 
@@ -201,8 +213,9 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
       hMultTrk_ass_[ipt] = fTrkAssHist.make<TH1I>(Form("hMulttrk_ass_%d",ipt), 
                                                  Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
                                                  1000, 0, 50000);
-   }
+   }*/
    TFileDirectory fTrkCorrAssHist  = fs->mkdir("AssTracksCorr");
+   /*
    hEtaTrk_corr_ass_.resize(pTmin_ass_.size()); 
    hPtTrk_corr_ass_.resize(pTmin_ass_.size()); 
    hPhiTrk_corr_ass_.resize(pTmin_ass_.size()); 
@@ -224,10 +237,12 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
       hMultTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hMulttrk_corr_ass_%d",ipt), 
                                                  Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
                                                  1000, 0, 50000);
-   }
+   }*/
+
    TFileDirectory fCTowHist = fs->mkdir("CaloTowers");
+   /*
    hEtaCTow_ = fCTowHist.make<TH1F>("hEtatow", "", 120, -6.,   6.);
-   hEtCTow_  = fCTowHist.make<TH1F>("hEttow",  "", 100,  0.,  10.);
+   hEtCTow_  = fCTowHist.make<TH1F>("hEttow",  "", 100,  0.,  10.);*/
    hPhiCTow_ = fCTowHist.make<TH1F>("hPhitow", "", 640, -3.2,  3.2);
 
    double etaW = (etamax_trg_ - etamin_ass_ - etamin_trg_ + etamax_ass_) / nEtaBins_;
@@ -235,17 +250,17 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
 
    TFileDirectory fSignalHist      = fs->mkdir("Signal");
    hSignal_.resize(pTmin_trg_.size());
-   hSignalPP_.resize(pTmin_trg_.size());
-   hSignalMM_.resize(pTmin_trg_.size());
-   hSignalPM_.resize(pTmin_trg_.size());
-   hSignalMP_.resize(pTmin_trg_.size());
+   //hSignalPP_.resize(pTmin_trg_.size());
+   //hSignalMM_.resize(pTmin_trg_.size());
+   //hSignalPM_.resize(pTmin_trg_.size());
+   //hSignalMP_.resize(pTmin_trg_.size());
    for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
    {
        hSignal_[itrg].resize(pTmin_ass_.size());
-       hSignalPP_[itrg].resize(pTmin_ass_.size());
-       hSignalMM_[itrg].resize(pTmin_ass_.size());
-       hSignalPM_[itrg].resize(pTmin_ass_.size());
-       hSignalMP_[itrg].resize(pTmin_ass_.size());
+       //hSignalPP_[itrg].resize(pTmin_ass_.size());
+       //hSignalMM_[itrg].resize(pTmin_ass_.size());
+       //hSignalPM_[itrg].resize(pTmin_ass_.size());
+       //hSignalMP_[itrg].resize(pTmin_ass_.size());
        for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
        {
           if( itrg < jass ) continue; 
@@ -259,6 +274,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
+          /*
           hSignalPP_[itrg][jass] = fSignalHist.make<TH2D>(Form("signal_pp_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
           pTmin_trg_[itrg], pTmax_trg_[itrg],
@@ -298,23 +314,23 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           etamax_trg_ - etamin_ass_ + etaW/2.,                    
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
-           ( TMath::Pi() * 3.0 - phiW) / 2.0);
+           ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
        }
    }
    TFileDirectory fBackgroundHist  = fs->mkdir("Background");
-   hDeltaZvtx_ = fBackgroundHist.make<TH1D>("deltazvtx",";#Delta z_{vtx}",200,-10.0,10.0);
+   //hDeltaZvtx_ = fBackgroundHist.make<TH1D>("deltazvtx",";#Delta z_{vtx}",200,-10.0,10.0);
    hBackground_.resize(pTmin_trg_.size());
-   hBackgroundPP_.resize(pTmin_trg_.size());
-   hBackgroundMM_.resize(pTmin_trg_.size());
-   hBackgroundPM_.resize(pTmin_trg_.size());
-   hBackgroundMP_.resize(pTmin_trg_.size());
+   //hBackgroundPP_.resize(pTmin_trg_.size());
+   //hBackgroundMM_.resize(pTmin_trg_.size());
+   //hBackgroundPM_.resize(pTmin_trg_.size());
+   //hBackgroundMP_.resize(pTmin_trg_.size());
    for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
    {
        hBackground_[itrg].resize(pTmin_ass_.size());
-       hBackgroundPP_[itrg].resize(pTmin_ass_.size());
-       hBackgroundMM_[itrg].resize(pTmin_ass_.size());
-       hBackgroundPM_[itrg].resize(pTmin_ass_.size());
-       hBackgroundMP_[itrg].resize(pTmin_ass_.size());
+       //hBackgroundPP_[itrg].resize(pTmin_ass_.size());
+       //hBackgroundMM_[itrg].resize(pTmin_ass_.size());
+       //hBackgroundPM_[itrg].resize(pTmin_ass_.size());
+       //hBackgroundMP_[itrg].resize(pTmin_ass_.size());
        for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
        {
           if( itrg < jass ) continue; 
@@ -328,6 +344,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
+          /*
           hBackgroundPP_[itrg][jass] = fBackgroundHist.make<TH2D>(Form("background_pp_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
           pTmin_trg_[itrg], pTmax_trg_[itrg],
@@ -367,26 +384,27 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           etamax_trg_ - etamin_ass_ + etaW/2.,                    
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
-           ( TMath::Pi() * 3.0 - phiW) / 2.0);
+           ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
        }
    }
    TFileDirectory fCorrelationHist = fs->mkdir("Correlation");
-   hCorrelation_.resize(pTmin_trg_.size());
-   hCorrelationPP_.resize(pTmin_trg_.size());
-   hCorrelationMM_.resize(pTmin_trg_.size());
-   hCorrelationPM_.resize(pTmin_trg_.size());
-   hCorrelationMP_.resize(pTmin_trg_.size());
-   for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
-   {
-       hCorrelation_[itrg].resize(pTmin_ass_.size());
-       hCorrelationPP_[itrg].resize(pTmin_ass_.size());
-       hCorrelationMM_[itrg].resize(pTmin_ass_.size());
-       hCorrelationPM_[itrg].resize(pTmin_ass_.size());
-       hCorrelationMP_[itrg].resize(pTmin_ass_.size());
-       for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
-       {
-          if( itrg < jass ) continue; 
-          hCorrelation_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_trg%d_ass%d", itrg, jass),
+   //hCorrelation_.resize(pTmin_trg_.size());
+   //hCorrelationPP_.resize(pTmin_trg_.size());
+   //hCorrelationMM_.resize(pTmin_trg_.size());
+   //hCorrelationPM_.resize(pTmin_trg_.size());
+   //hCorrelationMP_.resize(pTmin_trg_.size());
+   //for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
+   //{
+   //  hCorrelation_[itrg].resize(pTmin_ass_.size());
+       //hCorrelationPP_[itrg].resize(pTmin_ass_.size());
+       //hCorrelationMM_[itrg].resize(pTmin_ass_.size());
+       //hCorrelationPM_[itrg].resize(pTmin_ass_.size());
+       //hCorrelationMP_[itrg].resize(pTmin_ass_.size());
+   //  for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
+   //   {
+   //     if( itrg < jass ) continue; 
+   /*  
+   hCorrelation_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
                pTmin_trg_[itrg], pTmax_trg_[itrg],
                pTmin_trg_[jass], pTmax_trg_[jass]),
@@ -395,7 +413,8 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                etamax_trg_ - etamin_ass_ + etaW/2.,                    
                nPhiBins_ - 1,
                -( TMath::Pi() - phiW ) / 2.0,
-                ( TMath::Pi() * 3.0 - phiW) / 2.0);
+	       ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
+          /*
           hCorrelationPP_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_pp_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
                pTmin_trg_[itrg], pTmax_trg_[itrg],
@@ -435,9 +454,9 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                etamax_trg_ - etamin_ass_ + etaW/2.,                    
                nPhiBins_ - 1,
                -( TMath::Pi() - phiW ) / 2.0,
-                ( TMath::Pi() * 3.0 - phiW) / 2.0);
-       }
-   }
+                ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
+   //}
+   //}
 }
 
 ChargeDepAndPtCorr::~ChargeDepAndPtCorr()
@@ -515,8 +534,8 @@ ChargeDepAndPtCorr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       default:
          evtclass = -1; 
    }
-   hCent_->Fill(centBin);
-   hNoff_->Fill(noff);
+   //hCent_->Fill(centBin);
+   //hNoff_->Fill(noff);
 
    nTrkTot_trg_      = 0; 
    nTrkTot_corr_trg_ = 0; 
@@ -566,19 +585,23 @@ ChargeDepAndPtCorr::endJob()
    for( unsigned int i = 0; i < evtVec_.size(); i++ )
    {
       if( i % 100 == 0 ) std::cout << "Processing " << i << "th event" << std::endl;
+      //std::cout<<"Signal event :  " << i << std::endl<<std::endl<<std::endl;
       FillHistsSignal( i );
+      hCounts_->AddBinContent(1);
 
       unsigned int mixstart = i - bkgFactor_/2;
       unsigned int mixend   = i + bkgFactor_/2 + 1;
 
-      if(i < bkgFactor_/2)
+      //int Nmix=0;
+
+      if(i < bkgFactor_)
       {
          mixstart = 0;
-         mixend   = bkgFactor_ + 1;
+         mixend   = 2*bkgFactor_ + 1;
       }
-      else if(i > evtVec_.size() - bkgFactor_/2 - 1)
+      else if(i > evtVec_.size() - bkgFactor_ - 1)
       {
-         mixstart = evtVec_.size() - bkgFactor_ - 1;
+         mixstart = evtVec_.size() - 2*bkgFactor_ - 1;
          mixend   = evtVec_.size();
       }
 
@@ -588,17 +611,20 @@ ChargeDepAndPtCorr::endJob()
       for( unsigned int j = mixstart; j < mixend; j++ )
       {
           if(i == j) continue;
+          //if(Nmix >= 10) continue;
           //std::cout << i << " : " << j << std::endl;
           double deltazvtx = evtVec_[i].zvtx-evtVec_[j].zvtx;
-          hDeltaZvtx_->Fill(deltazvtx);
-
+          if(fabs(deltazvtx) > 2.0) continue;
+          
           FillHistsBackground( i, j );
+	  //Nmix++;
+	  hCounts_->AddBinContent(2);
       }
     }
     std::cout<< "Finish running correlation analysis!" << std::endl;
 
-    NormalizeHists();
-    std::cout<< "Finish normalizing the histograms!" << std::endl;
+    //NormalizeHists();
+    //std::cout<< "Finish normalizing the histograms!" << std::endl;
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -675,11 +701,11 @@ ChargeDepAndPtCorr::LoopVertices(const edm::Event& iEvent,
         }
    }
    // Fill vtx histograms
-   hXBestVtx_  ->Fill(xBestVtx_);
-   hYBestVtx_  ->Fill(yBestVtx_);
-   hRhoBestVtx_->Fill(rhoBestVtx_);
-   hZBestVtx_  ->Fill(zBestVtx_);
-   hNVtx_      ->Fill(nVtx_);
+   //hXBestVtx_  ->Fill(xBestVtx_);
+   //hYBestVtx_  ->Fill(yBestVtx_);
+   //hRhoBestVtx_->Fill(rhoBestVtx_);
+   //hZBestVtx_  ->Fill(zBestVtx_);
+   //hNVtx_      ->Fill(nVtx_);
 }
 
 //=========================================================================================
@@ -714,13 +740,13 @@ ChargeDepAndPtCorr::LoopNoff(const edm::Event& iEvent,
        // Get eta, pt and charge of the track
        double eta    = itTrk->eta();
        double pt     = itTrk->pt();
-       double charge = itTrk->charge();
+       int charge = itTrk->charge();
 
        // Select track based on quality
        if( !itTrk->quality(reco::TrackBase::highPurity) ) continue;
        if( fabs(dzvtx / dzerror)   > 3.0 ) continue;
        if( fabs(dxyvtx / dxyerror) > 3.0 ) continue;
-       if( fabs(pterror) / pt      > 1.0 ) continue;
+       if( fabs(pterror) / pt      > 0.1 ) continue;
        if( pt <= 0.4 ) continue;
        if( eta < -2.4 || eta > 2.4 ) continue;
        if( charge == 0 ) continue;
@@ -762,7 +788,7 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
        double eta    = itTrk->eta();
        double pt     = itTrk->pt();
        double phi    = itTrk->phi();
-       double charge = itTrk->charge();
+       int charge = itTrk->charge();
        // HI specific cuts
        double chi2n   = itTrk->normalizedChi2();
        double nlayers = itTrk->hitPattern().trackerLayersWithMeasurement();
@@ -777,12 +803,12 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
 
        if(isHI_ && isPix_ )
        {
-          bool goodpixtrk = false; // specific cuts for 
+          bool goodpixtrk = false; // Pixel tracks specific cuts for 
           if( pt <= pTmax_pix_         &&
-              nHits >= nhitsmin_pix_  && 
-              nHits <= nhitsmax_pix_ &&
+              nHits >= nhitsmin_pix_   && 
+              nHits <= nhitsmax_pix_   &&
               chi2n <= chi2nmax_pix_   &&
-              fabs(dzvtx / dzerror) <  dzdzerror_pix_ );
+              fabs(dzvtx / dzerror) <  dzdzerror_pix_ )
               goodpixtrk = true;
 
           if( !goodpixtrk )
@@ -829,17 +855,19 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
        double eff = 1.0;
        if(cweight_) eff = GetEffWeight(eta, pt, evtclass);
        AssignpTbins(pt, eta, phi, charge, eff, istrg, index);
+
+       hPhidist_->Fill(phi);
    }
 
    // Fill trk histograms
    if(istrg)
    {
       hMult_trg_     ->Fill(nTrkTot_trg_);
-      hMult_corr_trg_->Fill(nTrkTot_corr_trg_);
+      //hMult_corr_trg_->Fill(nTrkTot_corr_trg_);
       for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); ++itrg)
       {
-         hMultTrk_trg_[itrg]     ->Fill(nTrk_trg_[itrg]);
-         hMultTrk_corr_trg_[itrg]->Fill(nTrk_corr_trg_[itrg]);
+         //hMultTrk_trg_[itrg]     ->Fill(nTrk_trg_[itrg]);
+         //hMultTrk_corr_trg_[itrg]->Fill(nTrk_corr_trg_[itrg]);
          //std::cout << nTrk_corr_trg_[itrg] <<std::endl;
          (evt_->nMultCorrVect_trg)[itrg] = nTrk_corr_trg_[itrg];
       }
@@ -847,11 +875,11 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
    else
    {
       hMult_ass_     ->Fill(nTrkTot_ass_);
-      hMult_corr_ass_->Fill(nTrkTot_corr_ass_);
+      //hMult_corr_ass_->Fill(nTrkTot_corr_ass_);
       for(unsigned int iass = 0; iass < pTmin_ass_.size(); ++iass)
       {
-         hMultTrk_ass_[iass]     ->Fill(nTrk_ass_[iass]);
-         hMultTrk_corr_ass_[iass]->Fill(nTrk_corr_ass_[iass]);
+         //hMultTrk_ass_[iass]     ->Fill(nTrk_ass_[iass]);
+         //hMultTrk_corr_ass_[iass]->Fill(nTrk_corr_ass_[iass]);
          (evt_->nMultCorrVect_ass)[iass] = nTrk_corr_ass_[iass];
       }
    }
@@ -874,19 +902,20 @@ ChargeDepAndPtCorr::LoopCaloTower(const edm::Event& iEvent, const edm::EventSetu
    for( CaloTowerCollection::const_iterator itCTow = calotowers->begin();
         itCTow != calotowers->end();
         ++itCTow )
-   {
+   {    
+       /*
        // Get eta, pt and phi of the calo tower
-       double eta  = itCTow->eta();
+       double eta  = itCTow->eta();*/
        double et   = itCTow->et();
-       double phi  = itCTow->phi();
+       //double phi  = itCTow->phi();
 
        // Select calo tower based on quality
        if( et < 0.01 ) continue;
-
+        /*
        // Fill trk histograms
        hEtaCTow_->Fill(eta);
        hEtCTow_ ->Fill(et);
-       hPhiCTow_->Fill(phi);
+       hPhiCTow_->Fill(phi);*/
    }
 }
 
@@ -905,7 +934,7 @@ ChargeDepAndPtCorr::GetEffWeight(double eta, double pt, int evtclass)
       int centIdx = 0;
       for(int icent = 0; icent < static_cast<int>(effCorrBinMin_.size()); ++icent)
       {   
-          if(icent >= effCorrBinMin_[icent] && icent < effCorrBinMax_[icent])
+          if(evtclass >= effCorrBinMin_[icent] && evtclass < effCorrBinMax_[icent])
           {
              centIdx = icent;
              continue;
@@ -954,36 +983,44 @@ ChargeDepAndPtCorr::AssignpTbins(double pt,  double eta,
     pvector.SetPtEtaPhiM(pt, eta, phi, 0.140);
 
     if(istrg)
-    {
-       hPtTrk_trg_[idx] ->Fill(pt);
-       hEtaTrk_trg_[idx]->Fill(eta);
-       hPhiTrk_trg_[idx]->Fill(phi);
-       hPtTrk_corr_trg_[idx] ->Fill(pt, 1.0/eff);
-       hEtaTrk_corr_trg_[idx]->Fill(eta,1.0/eff);
-       hPhiTrk_corr_trg_[idx]->Fill(phi,1.0/eff);
-       (evt_->pVect_trg[idx]).push_back(pvector);
-       (evt_->chgVect_trg[idx]).push_back(charge);
-       (evt_->effVect_trg[idx]).push_back(eff);
-       nTrkTot_trg_++; 
-       nTrkTot_corr_trg_ += 1.0/eff;
-       nTrk_trg_[idx]++; 
-       nTrk_corr_trg_[idx] += 1.0/eff;
+    { 
+      if(charge > 0)
+       {
+           //hPtTrk_trg_[idx] ->Fill(pt);
+           //hEtaTrk_trg_[idx]->Fill(eta);
+           //hPhiTrk_trg_[idx]->Fill(phi);
+           //hPtTrk_corr_trg_[idx] ->Fill(pt, 1.0/eff);
+           //hEtaTrk_corr_trg_[idx]->Fill(eta,1.0/eff);
+           //hPhiTrk_corr_trg_[idx]->Fill(phi,1.0/eff);
+           (evt_->pVect_trg[idx]).push_back(pvector);
+           (evt_->chgVect_trg[idx]).push_back(charge);
+           (evt_->effVect_trg[idx]).push_back(eff);
+           nTrkTot_trg_++; 
+           nTrkTot_corr_trg_ += 1.0/eff;
+           nTrk_trg_[idx]++; 
+           nTrk_corr_trg_[idx] += 1.0/eff;
+         
+       }
     }
     else
     {
-       hPtTrk_ass_[idx] ->Fill(pt);
-       hEtaTrk_ass_[idx]->Fill(eta);
-       hPhiTrk_ass_[idx]->Fill(phi);
-       hPtTrk_corr_ass_[idx] ->Fill(pt, 1.0/eff);
-       hEtaTrk_corr_ass_[idx]->Fill(eta,1.0/eff);
-       hPhiTrk_corr_ass_[idx]->Fill(phi,1.0/eff);
-       (evt_->pVect_ass[idx]).push_back(pvector);
-       (evt_->chgVect_ass[idx]).push_back(charge);
-       (evt_->effVect_ass[idx]).push_back(eff);
-       nTrkTot_ass_++; 
-       nTrkTot_corr_ass_ += 1.0/eff;
-       nTrk_ass_[idx]++; 
-       nTrk_corr_ass_[idx] += 1.0/eff;
+      if(charge > 0)
+      {
+
+           //hPtTrk_ass_[idx] ->Fill(pt);
+           //hEtaTrk_ass_[idx]->Fill(eta);
+           //hPhiTrk_ass_[idx]->Fill(phi);
+           //hPtTrk_corr_ass_[idx] ->Fill(pt, 1.0/eff);
+           //hEtaTrk_corr_ass_[idx]->Fill(eta,1.0/eff);
+           //hPhiTrk_corr_ass_[idx]->Fill(phi,1.0/eff);
+           (evt_->pVect_ass[idx]).push_back(pvector);
+           (evt_->chgVect_ass[idx]).push_back(charge);
+           (evt_->effVect_ass[idx]).push_back(eff);
+           nTrkTot_ass_++; 
+           nTrkTot_corr_ass_ += 1.0/eff;
+           nTrk_ass_[idx]++; 
+           nTrk_corr_ass_[idx] += 1.0/eff;        
+	   }
     }
 }
 
@@ -998,10 +1035,13 @@ double
 ChargeDepAndPtCorr::GetDeltaPhi(double phi_trg, double phi_ass)
 {     
    double deltaPhi = phi_ass - phi_trg;
-   if(deltaPhi > TMath::Pi())
+
+   if(deltaPhi > 1.5*TMath::Pi())
       deltaPhi = deltaPhi - 2.0*TMath::Pi();
-   if(deltaPhi < -1.0*TMath::Pi() / 2.0)
+
+   else if(deltaPhi < -1.0*TMath::Pi() / 2.0)
      deltaPhi = deltaPhi + 2.0*TMath::Pi();
+
    return deltaPhi;
 }
 
@@ -1016,142 +1056,62 @@ ChargeDepAndPtCorr::FillHistsSignal(int ievt)
 
       unsigned int ntrgsize = evtVec_[ievt].pVect_trg[itrg].size();
       unsigned int nasssize = evtVec_[ievt].pVect_ass[jass].size();
-      double nMult_corr_trg = evtVec_[ievt].nMultCorrVect_trg[itrg];
+      //double nMult_corr_trg = evtVec_[ievt].nMultCorrVect_trg[itrg];
+      	
       for( unsigned int ntrg = 0; ntrg < ntrgsize; ntrg++ )
       {
           TLorentzVector pvector_trg = (evtVec_[ievt].pVect_trg[itrg])[ntrg];      
           double effweight_trg = (evtVec_[ievt].effVect_trg[itrg])[ntrg];
-          double chg_trg = (evtVec_[ievt].chgVect_trg[itrg])[ntrg];
+          int chg_trg = (evtVec_[ievt].chgVect_trg[itrg])[ntrg];
           double eta_trg = pvector_trg.Eta();
           double phi_trg = pvector_trg.Phi();
           double pt_trg  = pvector_trg.Pt();
+          //std::cout<<"Effweight trigger :   " << effweight_trg << std::endl;
 
           for( unsigned int nass = 0; nass < nasssize; nass++ )
           {
               TLorentzVector pvector_ass = (evtVec_[ievt].pVect_ass[jass])[nass];   
               double effweight_ass = (evtVec_[ievt].effVect_ass[jass])[nass];
-              double chg_ass = (evtVec_[ievt].chgVect_ass[jass])[nass];
+	      int chg_ass = (evtVec_[ievt].chgVect_ass[jass])[nass];
               double eta_ass = pvector_ass.Eta();
               double phi_ass = pvector_ass.Phi();
               double pt_ass  = pvector_ass.Pt();
 
               double deltaPhi = GetDeltaPhi(phi_trg, phi_ass);
+              double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
+
               double deltaEta = GetDeltaEta(eta_trg, eta_ass);
 
               //Skip the loop when trg, ass particles are the same
-              if( deltaEta == 0.0    && 
-                  deltaPhi == 0.0    && 
-                  pt_trg   == pt_ass &&
-                  chg_trg  == chg_ass ) 
-                 continue;
+              
+              if( deltaEta == 0.0  &&  deltaPhi == 0.0 && pt_trg==pt_ass) continue;
+              //if (pt_trg  < pt_ass) continue;
 
               //Total weight
-              double effweight = effweight_trg * effweight_ass * nMult_corr_trg;
+              double effweight = effweight_trg * effweight_ass;
+	      //double effweight = 1.0;
+	      
+	    
+	      // std::cout<<"Effweight associate :  "<<effweight_ass << std::endl;
               //Fill and symmetrize the distribution
-              hSignal_[itrg][jass]->Fill( fabs(deltaEta),
-                                          fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
-                                          fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              hSignal_[itrg][jass]->Fill( fabs(deltaEta),
-                                         -fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
-                                         -fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              hSignal_[itrg][jass]->Fill( fabs(deltaEta),
-                                          2*TMath::Pi()-fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
-                                          2*TMath::Pi()-fabs(deltaPhi),
-                                          1.0/4.0/effweight );
-              if( chg_trg > 0 && chg_ass > 0)
-              {
-                 hSignalPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-              } 
-              else if( chg_trg < 0 && chg_ass < 0)
-              {
-                 hSignalMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-              } 
-              if( chg_trg > 0 && chg_ass < 0)
-              {
-                 hSignalPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-              } 
-              if( chg_trg < 0 && chg_ass > 0)
-              {
-                 hSignalMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                              -fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-                 hSignalMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                               2*TMath::Pi()-fabs(deltaPhi),
-                                               1.0/4.0/effweight );
-              } 
+	      if(chg_trg > 0 && chg_ass > 0)
+	      {
+		  
+		hSignal_[itrg][jass]->Fill( fabs(deltaEta),
+					    deltaPhi,
+					    1.0/4.0/effweight );
+		hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
+					   deltaPhi,
+					   1.0/4.0/effweight );
+		hSignal_[itrg][jass]->Fill( fabs(deltaEta),
+					    deltaPhi2,
+					    1.0/4.0/effweight );
+		hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
+					   deltaPhi2,
+					   1.0/4.0/effweight );
+	      }
           }
-       }
+      }
     }
   }
 }
@@ -1170,154 +1130,59 @@ ChargeDepAndPtCorr::FillHistsBackground(int ievt_trg, int jevt_ass)
   {
       for( unsigned int jass = 0; jass < pTmin_ass_.size(); jass++ )
       {
-          if( itrg < jass ) continue;
+	if( itrg < jass ) continue;
 
           unsigned int ntrgsize = evtVec_[ievt_trg].pVect_trg[itrg].size();
           unsigned int nasssize = evtVec_[jevt_ass].pVect_ass[jass].size();
-          double nMult_corr_trg = evtVec_[ievt_trg].nMultCorrVect_trg[itrg];
-
+          //double nMult_corr_trg = evtVec_[ievt_trg].nMultCorrVect_trg[itrg];
+	  
           for( unsigned int ntrg = 0; ntrg < ntrgsize; ntrg++ )
           {
               TLorentzVector pvector_trg = (evtVec_[ievt_trg].pVect_trg[itrg])[ntrg];      
               double effweight_trg = (evtVec_[ievt_trg].effVect_trg[itrg])[ntrg];
-              double chg_trg = (evtVec_[ievt_trg].chgVect_trg[itrg])[ntrg];
+	      int chg_trg = (evtVec_[ievt_trg].chgVect_trg[itrg])[ntrg];
               double eta_trg = pvector_trg.Eta();
               double phi_trg = pvector_trg.Phi();
-              //double pt_trg  = pvector_trg.Pt();
-
+              double pt_trg  = pvector_trg.Pt();
+	      //std::cout<<"Effweight trigger    " << effweight_trg<<std::endl;
               for( unsigned int nass = 0; nass < nasssize; nass++ )
               {
                   TLorentzVector pvector_ass = (evtVec_[jevt_ass].pVect_ass[jass])[nass];   
                   double effweight_ass = (evtVec_[jevt_ass].effVect_ass[jass])[nass];
-                  double chg_ass = (evtVec_[jevt_ass].chgVect_trg[jass])[nass];
+		  int chg_ass = (evtVec_[jevt_ass].chgVect_ass[jass])[nass];
                   double eta_ass = pvector_ass.Eta();
                   double phi_ass = pvector_ass.Phi();
-                  //double pt_ass  = pvector_ass.Pt();
+                  double pt_ass  = pvector_ass.Pt();
 
                   double deltaPhi = GetDeltaPhi( phi_trg, phi_ass );
+                  double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
                   double deltaEta = GetDeltaEta( eta_trg, eta_ass );
-
-                  //Skip the loop when trg, ass particles are the same
-                  //if( deltaEta == 0.0    && 
-                  //    deltaPhi == 0.0    && 
-                  //    pt_trg   == pt_ass &&
-                  //    chg_trg  == chg_ass ) 
-                  //   continue;
-         
+		                    
+                  if( deltaEta == 0.0  &&  deltaPhi == 0.0 && pt_trg==pt_ass) continue;
+                  //if (pt_trg  < pt_ass) continue;
+                  
                   //Total weight
-                  double effweight = effweight_trg * effweight_ass * nMult_corr_trg;
-
+                  double effweight = effweight_trg * effweight_ass;
+		  //double effweight = 1.0;
+		  
+		  //		  std::cout<<"Effweight associate   "<< effweight_ass<<std::endl;
                   //Fill and symmetrize the distribution
-                  hBackground_[itrg][jass]->Fill( fabs(deltaEta),
-                                                  fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  hBackground_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                  fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  hBackground_[itrg][jass]->Fill( fabs(deltaEta),
-                                                 -fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  hBackground_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                 -fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  hBackground_[itrg][jass]->Fill( fabs(deltaEta),
-                                                  2*TMath::Pi() - fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  hBackground_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                  2*TMath::Pi() - fabs(deltaPhi),
-                                                  1.0/4.0/effweight );
-                  if( chg_trg > 0 && chg_ass > 0)
-                  {
-                     hBackgroundPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                  }
-                  if( chg_trg < 0 && chg_ass < 0)
-                  {
-                     hBackgroundMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                  }
-                  if( chg_trg > 0 && chg_ass < 0)
-                  {
-                     hBackgroundPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPM_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundPM_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                  }
-                  if( chg_trg < 0 && chg_ass > 0)
-                  {
-                     hBackgroundMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                    -fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMP_[itrg][jass]->Fill( fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                     hBackgroundMP_[itrg][jass]->Fill(-fabs(deltaEta),
-                                                     2*TMath::Pi() - fabs(deltaPhi),
-                                                     1.0/4.0/effweight );
-                  }
-              }
+                  if(chg_trg > 0 && chg_ass > 0)
+		    {
+		      
+                      hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
+                      hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
+                      hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight );
+                      hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight );
+		    }    
+	      }
           }
       }
   }
 }
 
-void 
-ChargeDepAndPtCorr::NormalizeHists()
+/*void
+  ChargeDepAndPtCorr::NormalizeHists()
 {
   for( unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++ )
   {
@@ -1338,61 +1203,9 @@ ChargeDepAndPtCorr::NormalizeHists()
          hCorrelation_[itrg][jass]->Divide(hBackground_[itrg][jass]);
          hCorrelation_[itrg][jass]->Scale(hBackground_[itrg][jass]->GetBinContent(hBackground_[itrg][jass]->FindBin(0,0)));  
       }
-      if( hSignalPP_[itrg][jass]->Integral() != 0 && 
-          hBackgroundPP_[itrg][jass]->Integral() != 0 ) 
-      {
-      double  etabinwidth = hSignalPP_[itrg][jass]->GetXaxis()->GetBinWidth(1);
-      double  phibinwidth = hSignalPP_[itrg][jass]->GetYaxis()->GetBinWidth(1);
- 
-      hSignalPP_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
-      hBackgroundPP_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
-
-      hCorrelationPP_[itrg][jass]->Add(hSignalPP_[itrg][jass]);
-      hCorrelationPP_[itrg][jass]->Divide(hBackgroundPP_[itrg][jass]);
-      hCorrelationPP_[itrg][jass]->Scale(hBackgroundPP_[itrg][jass]->GetBinContent(hBackgroundPP_[itrg][jass]->FindBin(0,0)));  
-      }
-      if( hSignalMM_[itrg][jass]->Integral() != 0 && 
-          hBackgroundMM_[itrg][jass]->Integral() != 0 ) 
-      {
-      double  etabinwidth = hSignalMM_[itrg][jass]->GetXaxis()->GetBinWidth(1);
-      double  phibinwidth = hSignalMM_[itrg][jass]->GetYaxis()->GetBinWidth(1);
- 
-      hSignalMM_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
-      hBackgroundMM_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
-
-      hCorrelationMM_[itrg][jass]->Add(hSignalMM_[itrg][jass]);
-      hCorrelationMM_[itrg][jass]->Divide(hBackgroundMM_[itrg][jass]);
-      hCorrelationMM_[itrg][jass]->Scale(hBackgroundMM_[itrg][jass]->GetBinContent(hBackgroundMM_[itrg][jass]->FindBin(0,0)));  
-      }
-      if( hSignalPM_[itrg][jass]->Integral() != 0 && 
-          hBackgroundPM_[itrg][jass]->Integral() != 0 ) 
-      {
-      double  etabinwidth = hSignalPM_[itrg][jass]->GetXaxis()->GetBinWidth(1);
-      double  phibinwidth = hSignalPM_[itrg][jass]->GetYaxis()->GetBinWidth(1);
- 
-      hSignalPM_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
-      hBackgroundPM_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
-
-      hCorrelationPM_[itrg][jass]->Add(hSignalPM_[itrg][jass]);
-      hCorrelationPM_[itrg][jass]->Divide(hBackgroundPM_[itrg][jass]);
-      hCorrelationPM_[itrg][jass]->Scale(hBackgroundPM_[itrg][jass]->GetBinContent(hBackgroundPM_[itrg][jass]->FindBin(0,0)));  
-      }
-      if( hSignalMP_[itrg][jass]->Integral() != 0 && 
-          hBackgroundMP_[itrg][jass]->Integral() != 0 ) 
-      {
-      double  etabinwidth = hSignalMP_[itrg][jass]->GetXaxis()->GetBinWidth(1);
-      double  phibinwidth = hSignalMP_[itrg][jass]->GetYaxis()->GetBinWidth(1);
- 
-      hSignalMP_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
-      hBackgroundMP_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
-
-      hCorrelationMP_[itrg][jass]->Add(hSignalMP_[itrg][jass]);
-      hCorrelationMP_[itrg][jass]->Divide(hBackgroundMP_[itrg][jass]);
-      hCorrelationMP_[itrg][jass]->Scale(hBackgroundMP_[itrg][jass]->GetBinContent(hBackgroundMP_[itrg][jass]->FindBin(0,0))); 
-      } 
     }
   }
-}
+  }*/
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(ChargeDepAndPtCorr);

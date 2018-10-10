@@ -85,6 +85,7 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       void FillHistsBackground(int ievt_trg, int jevt_ass);
       void NormalizeHists();
 
+   
    private:
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
@@ -175,6 +176,8 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       std::vector< DiHadronCorrelationEvt > evtVec_;
       unsigned int bkgFactor_;
 
+      
+          
       // ## histograms ##
       //~~~> Vertex
       TH1F* hXBestVtx_;
@@ -182,6 +185,9 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       TH1F* hRhoBestVtx_;
       TH1F* hZBestVtx_;
       TH1I* hNVtx_;
+
+      TH1F* hPhidist_;
+
       //~~~> Global 
       TH1I* hCent_;
       TH1I* hNoff_;
@@ -189,6 +195,7 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       TH1F* hMult_corr_trg_;
       TH1I* hMult_ass_;
       TH1F* hMult_corr_ass_;
+      TH1I* hCounts_; //claude
       //~~~> Trigger tracks RAW
       std::vector<TH1F*> hEtaTrk_trg_;
       std::vector<TH1F*> hPtTrk_trg_; 
@@ -219,12 +226,15 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       std::vector< std::vector<TH2D*> > hSignalMM_;
       std::vector< std::vector<TH2D*> > hSignalPM_;
       std::vector< std::vector<TH2D*> > hSignalMP_;
+
       TH1D* hDeltaZvtx_;
+
       std::vector< std::vector<TH2D*> > hBackground_;
       std::vector< std::vector<TH2D*> > hBackgroundPP_;
       std::vector< std::vector<TH2D*> > hBackgroundMM_;
       std::vector< std::vector<TH2D*> > hBackgroundPM_;
       std::vector< std::vector<TH2D*> > hBackgroundMP_;
+
       std::vector< std::vector<TH2D*> > hCorrelation_;
       std::vector< std::vector<TH2D*> > hCorrelationPP_;
       std::vector< std::vector<TH2D*> > hCorrelationMM_;
@@ -232,6 +242,10 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       std::vector< std::vector<TH2D*> > hCorrelationMP_;
       int nEtaBins_;
       int nPhiBins_;
+
+    
+
+     
 };
 
 //

@@ -12,17 +12,17 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10
 # Configure the number of maximum event the analyser run on in interactive mode
 # -1 == ALL
 process.maxEvents = cms.untracked.PSet( 
-    input = cms.untracked.int32(300) 
+    input = cms.untracked.int32(-1) 
     #input = cms.untracked.int32(1) 
 )
 
 
 # __________________ I/O files _________________
 
-# Define the input file to run on in interactive mode
+#Simulation file
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2015/HIMinimumBias2/AOD/25Aug2016-v1/90000/34CD034C-ED6F-E611-A55F-44A842124E15.root'
+        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
     )
 )
 
@@ -71,16 +71,12 @@ process.clusterCompatibilityFilter.clusterTrunc = cms.double(2.0)
 
 # Load you analyzer with initial configuration
 process.load("Analyzers.ChargeDepAndPtCorr.chargedepptcorr_cff")
-process.defaultAnalysis_3035 = process.CPDC3035.clone()
 process.defaultAnalysis_3540 = process.CPDC3540.clone()
-process.defaultAnalysis_4045 = process.CPDC4045.clone()
-process.defaultAnalysis_4550 = process.CPDC4550.clone()
+#process.defaultAnalysis_4045 = process.CPDC4045.clone()
+#process.defaultAnalysis_4550 = process.CPDC4550.clone()
 process.p = cms.Path(process.hfCoincFilter3 *             # Requier HF coincidence with 3 GeV  
                      process.primaryVertexFilter *        # Clean up on vertices
                      process.clusterCompatibilityFilter * # Clean up on pileup
                      process.centralityBin *              # Compute centrality
                      process.hltMB *                      # Select MB events
-                     process.defaultAnalysis_3035 *       
-                     process.defaultAnalysis_3540 *       
-                     process.defaultAnalysis_4045 *       
-                     process.defaultAnalysis_4550)        # Run the analyzer
+                     process.defaultAnalysis_3540)
