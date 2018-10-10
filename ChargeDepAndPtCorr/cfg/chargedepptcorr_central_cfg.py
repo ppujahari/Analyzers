@@ -13,24 +13,32 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10
 # -1 == ALL
 process.maxEvents = cms.untracked.PSet( 
     #input = cms.untracked.int32(-1) 
-    input = cms.untracked.int32(100) 
+    input = cms.untracked.int32(1000) 
 )
 
 
 # __________________ I/O files _________________
 
 # Define the input file to run on in interactive mode
-#process.source = cms.Source("PoolSource",
-#    fileNames = cms.untracked.vstring(
-#        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2015/HIMinimumBias2/AOD/25Aug2016-v1/90000/34CD034C-ED6F-E611-A55F-44A842124E15.root'
-#    )
-#)
-
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
+        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2015/HIMinimumBias2/AOD/25Aug2016-v1/90000/34CD034C-ED6F-E611-A55F-44A842124E15.root'
     )
 )
+
+#----- Testing one One file -------------------
+#process.source = cms.Source("PoolSource",
+#    fileNames = cms.untracked.vstring(
+#        'file:/afs/cern.ch/work/q/qwang/public/PbPb2015_tracking/pixeltracking_1.root'
+#    )
+#)
+#----------------------------------------------
+
+#process.source = cms.Source("PoolSource",
+#    fileNames = cms.untracked.vstring(
+#        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
+#    )
+#)
 
 # Define output file name
 import os
@@ -72,6 +80,24 @@ process.load('HeavyIonsAnalysis.EventAnalysis.HIClusterCompatibilityFilter_cfi')
 process.clusterCompatibilityFilter.clusterPars = cms.vdouble(0.0,0.006)
 process.clusterCompatibilityFilter.clusterTrunc = cms.double(2.0)
 
+# Pixel ReRECO CC Tune (New addition for Pileup rejection Prabhat---- Jun29)
+#The following lines of code for the provide the parameters for the respective tunes:
+
+#process.clusterCompatibilityFilter.pixelTune  = cms.untracked.bool(True)
+
+# 0.5%
+
+#process.clusterCompatibilityFilter.pixelTunePolyClusterPars = cms.untracked.vdouble(2.80464, 1.31997e-05, -6.65202e-10, 3.39093e-14, -9.93328e-19, 1.01562e-23)
+#process.clusterCompatibilityFilter.pixelTuneLineClusterPars = cms.untracked.vdouble(1.82726, 0.000989945)
+#process.clusterCompatibilityFilter.clusterTrunc             = cms.double(3.64)
+#process.clusterCompatibilityFilter.nhitsLineTrunc           = cms.untracked.int32(1000)
+
+# 3%
+
+#process.clusterCompatibilityFilter.pixelTunePolyClusterPars = cms.untracked.vdouble(3.12211, 5.04532e-05, -2.4#6064e-09, 7.08956e-14, -1.22693e-18, 9.17866e-24)
+#process.clusterCompatibilityFilter.pixelTuneLineClusterPars = cms.untracked.vdouble(2.24092, 0.000929259)
+#process.clusterCompatibilityFilter.clusterTrunc             = cms.double(3.79)
+#process.clusterCompatibilityFilter.nhitsLineTrunc           = cms.untracked.int32(1000)
 
 # __________________ Analyse Sequence _________________
 
@@ -85,4 +111,6 @@ process.p = cms.Path(process.hfCoincFilter3 *             # Requier HF coinciden
                      process.centralityBin *              # Compute centrality
                      process.hltMB *                      # Select MB events
                      process.defaultAnalysis_05)
+                     
+                     
 

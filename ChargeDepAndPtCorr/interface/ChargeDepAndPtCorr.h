@@ -2,7 +2,7 @@
 //
 // Package:    Analyzers/ChargeDepAndPtCorr
 // Class:      ChargeDepAndPtCorr
-// 
+//
 /**\class ChargeDepAndPtCorr ChargeDepAndPtCorr.h Analyzers/ChargeDepAndPtCorr/interface/ChargeDepAndPtCorr.h
 
  Description: [one line class summary]
@@ -46,6 +46,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TTree.h"
+#include "TVector3.h"
 
 #include "Analyzers/ChargeDepAndPtCorr/interface/DiHadronCorrelationEvt.h"
 //
@@ -67,29 +68,40 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
 
       void   LoopVertices(const edm::Event& iEvent, const edm::EventSetup& iSetup);
       double LoopNoff(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-      void   LoopTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+      void   LoopTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup,
                         bool istrg, int evtclass);
       void   LoopCaloTower(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
       double GetEffWeight(double eta, double pt, int evtclass);
+      //double GetEffWeight(const TVector3 a, int evtclass);
       int    GetpTbin(double pt, bool istrig);
-      void   AssignpTbins(double pt,  double eta, 
-                          double phi, int charge, 
+      void   AssignpTbins(double pt,  double eta,
+                          double phi, int charge,
                           double eff, bool istrg,
                           int idx);
 
+
+      double deltaeta(const TVector3 a, const TVector3 b);
+      double deltaphi(const TVector3 a, const TVector3 b);
+
+
       double GetDeltaEta(double eta_trg, double eta_ass);
       double GetDeltaPhi(double phi_trg, double phi_ass);
+      double GetDPhiStar(double phi1, double pt1, int charge1, double phi2, double pt2, int charge2, double radius, double bSign);
 
       void FillHistsSignal(int ievt);
       void FillHistsBackground(int ievt_trg, int jevt_ass);
       void NormalizeHists();
 
-   
+
    private:
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
+
+
+      TVector3 trigger;
+      TVector3 associated;
 
       // ----------member data ---------------------------
       // ## tracks ##
@@ -98,16 +110,16 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
 
       // ## vertex ##
       // used to select what vertex to read from configuration file
-      edm::EDGetTokenT<reco::VertexCollection> vtxTags_; 
+      edm::EDGetTokenT<reco::VertexCollection> vtxTags_;
 
       // ## calotower ##
       // used to select what calo tower to read from configuration file
-      edm::EDGetTokenT<CaloTowerCollection> caloTowersTags_; 
+      edm::EDGetTokenT<CaloTowerCollection> caloTowersTags_;
 
       // ## centrality ##
       // used to select what centrality collection to read from configuration file
       edm::EDGetTokenT<reco::Centrality> centralityTags_;
-      // used to access centrality bins 
+      // used to access centrality bins
       edm::EDGetTokenT<int> centralityBinTags_;
 
       // ## event classifier ##
@@ -120,18 +132,18 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       // ## Eff/Fake coorection
       bool cweight_; //Apply (True) or not (False) the eff/fake correction
       edm::InputTag fname_; //Name of the file that contains the eff corrections
-      std::vector<int> effCorrBinMin_; //Mult/Cent binning of the eff/coor tables 
+      std::vector<int> effCorrBinMin_; //Mult/Cent binning of the eff/coor tables
       std::vector<int> effCorrBinMax_; //Mult/Cent binning of the eff/coor tables
       TFile* feff_; //ROOT File that contains histograms used for corrections
       std::vector<TH2D*> heff_; //Histograms used for corrections (eta, pT)
 
       // ## Vertex variables
       int nVtx_;
-      double xBestVtx_; //Best vertex X position 
+      double xBestVtx_; //Best vertex X position
       double yBestVtx_; //Best vertex Y position
       double zBestVtx_; //Best vertex Z position
       double rhoBestVtx_; //Best vertex XY position
-      double xBestVtxError_; //Best vertex X error 
+      double xBestVtxError_; //Best vertex X error
       double yBestVtxError_; //Best vertex Y error
       double zBestVtxError_; //Best vertex Z error
       double zminVtx_; //min value for Z cut on vtx position
@@ -141,15 +153,15 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       bool selectVtxByMult_;       //False: sel best vtx by sum pT^2 True: sel best vtx with highest multiplicity
 
       // ## track selection ##
-      int    nTrkTot_trg_; 
-      float  nTrkTot_corr_trg_; 
-      int    nTrkTot_ass_; 
-      float  nTrkTot_corr_ass_; 
-      std::vector<int>    nTrk_trg_; 
-      std::vector<double> nTrk_corr_trg_; 
-      std::vector<int>    nTrk_ass_; 
-      std::vector<double> nTrk_corr_ass_; 
-      double dzdzerror_; //DCA - z  significance 
+      int    nTrkTot_trg_;
+      float  nTrkTot_corr_trg_;
+      int    nTrkTot_ass_;
+      float  nTrkTot_corr_ass_;
+      std::vector<int>    nTrk_trg_;
+      std::vector<double> nTrk_corr_trg_;
+      std::vector<int>    nTrk_ass_;
+      std::vector<double> nTrk_corr_ass_;
+      double dzdzerror_; //DCA - z  significance
       double d0dz0rror_; //DCA - xy significance
       double pTerrorpT_; //DCA - pT resolution
       std::vector< double > pTmin_trg_; //min pt of the trigger tracks
@@ -170,14 +182,14 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       int nhitsmin_; //min number of hits for general tracks
       std::vector<int> algo_; //algo for general tracks
       double chi2nmax_; //maximum chi2 for general track
-      
+
       // ## Dihardon corr events ##
       DiHadronCorrelationEvt* evt_;
       std::vector< DiHadronCorrelationEvt > evtVec_;
       unsigned int bkgFactor_;
 
-      
-          
+
+
       // ## histograms ##
       //~~~> Vertex
       TH1F* hXBestVtx_;
@@ -188,32 +200,34 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
 
       TH1F* hPhidist_;
 
-      //~~~> Global 
+      //~~~> Global
       TH1I* hCent_;
       TH1I* hNoff_;
       TH1I* hMult_trg_;
       TH1F* hMult_corr_trg_;
       TH1I* hMult_ass_;
       TH1F* hMult_corr_ass_;
+
       TH1I* hCounts_; //claude
+
       //~~~> Trigger tracks RAW
       std::vector<TH1F*> hEtaTrk_trg_;
-      std::vector<TH1F*> hPtTrk_trg_; 
+      std::vector<TH1F*> hPtTrk_trg_;
       std::vector<TH1F*> hPhiTrk_trg_;
       std::vector<TH1I*> hMultTrk_trg_;
       //~~~> Trigger tracks CORR
       std::vector<TH1F*> hEtaTrk_corr_trg_;
-      std::vector<TH1F*> hPtTrk_corr_trg_; 
+      std::vector<TH1F*> hPtTrk_corr_trg_;
       std::vector<TH1F*> hPhiTrk_corr_trg_;
       std::vector<TH1F*> hMultTrk_corr_trg_;
       //~~~> Associated tracks RAW
       std::vector<TH1F*> hEtaTrk_ass_;
-      std::vector<TH1F*> hPtTrk_ass_; 
+      std::vector<TH1F*> hPtTrk_ass_;
       std::vector<TH1F*> hPhiTrk_ass_;
       std::vector<TH1I*> hMultTrk_ass_;
       //~~~> Associated tracks CORR
       std::vector<TH1F*> hEtaTrk_corr_ass_;
-      std::vector<TH1F*> hPtTrk_corr_ass_; 
+      std::vector<TH1F*> hPtTrk_corr_ass_;
       std::vector<TH1F*> hPhiTrk_corr_ass_;
       std::vector<TH1F*> hMultTrk_corr_ass_;
       //~~~> Calo towers
@@ -243,9 +257,9 @@ class ChargeDepAndPtCorr : public edm::one::EDAnalyzer<edm::one::SharedResources
       int nEtaBins_;
       int nPhiBins_;
 
-    
 
-     
+
+
 };
 
 //

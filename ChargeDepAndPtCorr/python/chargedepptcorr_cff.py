@@ -7,7 +7,7 @@ from Analyzers.ChargeDepAndPtCorr.chargedepptcorr_cfi import *
 #### centrality 0-5% ####
 CPDC05 = defaultCPDC.clone()
 CPDC05.centmin = cms.untracked.int32(0)
-CPDC05.centmax = cms.untracked.int32(5)
+CPDC05.centmax = cms.untracked.int32(5) ##5
 #### centrality 5-10% ####
 CPDC510 = defaultCPDC.clone()
 CPDC510.centmin = cms.untracked.int32(5)

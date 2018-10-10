@@ -20,11 +20,19 @@ process.maxEvents = cms.untracked.PSet(
 # __________________ I/O files _________________
 
 #Simulation file
+#process.source = cms.Source("PoolSource",
+#    fileNames = cms.untracked.vstring(
+#        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
+#    )
+#)
+
+# Define the input file to run on in interactive mode                                                                       
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://cms-xrd-global.cern.ch//store/himc/HINPbPbWinter16DR/Hydjet_Quenched_MinBias_5020GeV_750/AODSIM/NoPU_75X_mcRun2_HeavyIon_v13_75X_mcRun2_HeavyIon_v13-v1/80000/001E4607-5BBA-E611-9A99-0CC47A7E6A2C.root'
+        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2015/HIMinimumBias2/AOD/25Aug2016-v1/90000/34CD034C-ED6F-E611-A55F-44A842124E15.root'
     )
 )
+
 
 # Define output file name
 import os
@@ -71,6 +79,7 @@ process.clusterCompatibilityFilter.clusterTrunc = cms.double(2.0)
 
 # Load you analyzer with initial configuration
 process.load("Analyzers.ChargeDepAndPtCorr.chargedepptcorr_cff")
+#process.defaultAnalysis_3035 = process.CPDC3035.clone()
 process.defaultAnalysis_3540 = process.CPDC3540.clone()
 #process.defaultAnalysis_4045 = process.CPDC4045.clone()
 #process.defaultAnalysis_4550 = process.CPDC4550.clone()
@@ -80,3 +89,4 @@ process.p = cms.Path(process.hfCoincFilter3 *             # Requier HF coinciden
                      process.centralityBin *              # Compute centrality
                      process.hltMB *                      # Select MB events
                      process.defaultAnalysis_3540)
+                     

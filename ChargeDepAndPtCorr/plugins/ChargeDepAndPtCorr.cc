@@ -2,14 +2,14 @@
 //
 // Package:    Analyzers/ChargeDepAndPtCorr
 // Class:      ChargeDepAndPtCorr
-// 
+//
 /**\class ChargeDepAndPtCorr ChargeDepAndPtCorr.cc Analyzers/ChargeDepAndPtCorr/plugins/ChargeDepAndPtCorr.cc
  Description: [one line class summary]
  Implementation:
      [Notes on implementation]
 */
 //
-// Original Author:  Maxime & Prabhat 
+//          Author:  Prabhat Pujahari 
 //         Created:  Thu, 01 Jun 2017 16:56:11 GMT
 //
 //This code is doing the calculation using DeltaVz method 2.
@@ -122,120 +122,121 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
    TFileDirectory fGlobalHist  = fs->mkdir("Global");
    //hCent_          = fGlobalHist.make<TH1I>("hCent", "",  200, 0, 200);
    hCounts_          = fGlobalHist.make<TH1I>("hCent", "",  2, 0, 2);
+
    //hNoff_          = fGlobalHist.make<TH1I>("hNoff", "p_{T} > 0.4 GeV/c", 1000, 0, 1000);*/
-   hMult_trg_      = fGlobalHist.make<TH1I>("hMult_trg", 
-                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]), 
-                                            200, 0, 2000);
-   
+   hMult_trg_      = fGlobalHist.make<TH1I>("hMult_trg",
+                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]),
+                                            2000, 0, 2000);
+
    /*hMult_corr_trg_ = fGlobalHist.make<TH1F>("hMultcorr_trg",
-                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]), 
+                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[0], pTmax_trg_[pTmax_trg_.size()-1]),
 					    1000, 0, 50000);*/
-   hMult_ass_      = fGlobalHist.make<TH1I>("hMult_ass", 
-                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]), 
-                                            200, 0, 2000);/*
+   hMult_ass_      = fGlobalHist.make<TH1I>("hMult_ass",
+                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]),
+                                            2000, 0, 2000);/*
    hMult_corr_ass_ = fGlobalHist.make<TH1F>("hMultcorr_ass",
-                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]), 
+                                            Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[0], pTmax_ass_[pTmax_ass_.size()-1]),
                                             1000, 0, 50000);
 
                                             */
-   hPhidist_ = fGlobalHist.make<TH1F>("hPhidist", "", 640, -3.2,  3.2);
+   hPhidist_ = fGlobalHist.make<TH1F>("hPhidist", "", 31, -TMath::Pi(),  TMath::Pi() );
 
    TFileDirectory fTrkTrgHist  = fs->mkdir("TrgTracksRaw");
    /*
-   hEtaTrk_trg_.resize(pTmin_trg_.size()); 
-   hPtTrk_trg_.resize(pTmin_trg_.size()); 
-   hPhiTrk_trg_.resize(pTmin_trg_.size()); 
-   hMultTrk_trg_.resize(pTmin_trg_.size()); 
+   hEtaTrk_trg_.resize(pTmin_trg_.size());
+   hPtTrk_trg_.resize(pTmin_trg_.size());
+   hPhiTrk_trg_.resize(pTmin_trg_.size());
+   hMultTrk_trg_.resize(pTmin_trg_.size());
    for(unsigned int ipt = 0; ipt < pTmin_trg_.size(); ++ipt)
    {
       //bin size for some plots
       int nbins_trg = static_cast<int>((pTmax_trg_[ipt]-pTmin_trg_[ipt])/0.01);
 
-      hEtaTrk_trg_[ipt] = fTrkTrgHist.make<TH1F>(Form("hEtatrk_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hEtaTrk_trg_[ipt] = fTrkTrgHist.make<TH1F>(Form("hEtatrk_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  300, -3., 3.);
-      hPtTrk_trg_[ipt]  = fTrkTrgHist.make<TH1F>(Form("hPttrk_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hPtTrk_trg_[ipt]  = fTrkTrgHist.make<TH1F>(Form("hPttrk_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  nbins_trg, pTmin_trg_[ipt], pTmax_trg_[ipt]);
-      hPhiTrk_trg_[ipt] = fTrkTrgHist.make<TH1F>(Form("hPhitrk_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hPhiTrk_trg_[ipt] = fTrkTrgHist.make<TH1F>(Form("hPhitrk_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  640, -3.2, 3.2);
-      hMultTrk_trg_[ipt] = fTrkTrgHist.make<TH1I>(Form("hMulttrk_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hMultTrk_trg_[ipt] = fTrkTrgHist.make<TH1I>(Form("hMulttrk_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  1000, 0, 50000);
    }
    */
    TFileDirectory fTrkCorrTrgHist  = fs->mkdir("TrgTracksCorr");
    /*
-   hEtaTrk_corr_trg_.resize(pTmin_trg_.size()); 
-   hPtTrk_corr_trg_.resize(pTmin_trg_.size()); 
-   hPhiTrk_corr_trg_.resize(pTmin_trg_.size()); 
-   hMultTrk_corr_trg_.resize(pTmin_trg_.size()); 
+   hEtaTrk_corr_trg_.resize(pTmin_trg_.size());
+   hPtTrk_corr_trg_.resize(pTmin_trg_.size());
+   hPhiTrk_corr_trg_.resize(pTmin_trg_.size());
+   hMultTrk_corr_trg_.resize(pTmin_trg_.size());
    for(unsigned int ipt = 0; ipt < pTmin_trg_.size(); ++ipt)
    {
       //bin size for some plots
       int nbins_trg = static_cast<int>((pTmax_trg_[ipt]-pTmin_trg_[ipt])/0.01);
 
-      hEtaTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hEtatrk_corr_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hEtaTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hEtatrk_corr_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  300, -3., 3.);
-      hPtTrk_corr_trg_[ipt]  = fTrkCorrTrgHist.make<TH1F>(Form("hPttrk_corr_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hPtTrk_corr_trg_[ipt]  = fTrkCorrTrgHist.make<TH1F>(Form("hPttrk_corr_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  nbins_trg, pTmin_trg_[ipt], pTmax_trg_[ipt]);
-      hPhiTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hPhitrk_corr_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hPhiTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hPhitrk_corr_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  640, -3.2, 3.2);
-      hMultTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hMulttrk_corr_trg_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]), 
+      hMultTrk_corr_trg_[ipt] = fTrkCorrTrgHist.make<TH1F>(Form("hMulttrk_corr_trg_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_trg_[ipt], pTmax_trg_[ipt]),
                                                  1000, 0, 50000);
    }
    */
    TFileDirectory fTrkAssHist  = fs->mkdir("AssTracksRaw");
    /*
-   hEtaTrk_ass_.resize(pTmin_ass_.size()); 
-   hPtTrk_ass_.resize(pTmin_ass_.size()); 
-   hPhiTrk_ass_.resize(pTmin_ass_.size()); 
-   hMultTrk_ass_.resize(pTmin_ass_.size()); 
+   hEtaTrk_ass_.resize(pTmin_ass_.size());
+   hPtTrk_ass_.resize(pTmin_ass_.size());
+   hPhiTrk_ass_.resize(pTmin_ass_.size());
+   hMultTrk_ass_.resize(pTmin_ass_.size());
    for(unsigned int ipt = 0; ipt < pTmin_ass_.size(); ++ipt)
    {
       //bin size for some plots
       int nbins_ass = static_cast<int>((pTmax_ass_[ipt]-pTmin_ass_[ipt])/0.01);
 
-      hEtaTrk_ass_[ipt] = fTrkAssHist.make<TH1F>(Form("hEtatrk_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hEtaTrk_ass_[ipt] = fTrkAssHist.make<TH1F>(Form("hEtatrk_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  300, -3., 3.);
-      hPtTrk_ass_[ipt]  = fTrkAssHist.make<TH1F>(Form("hPttrk_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hPtTrk_ass_[ipt]  = fTrkAssHist.make<TH1F>(Form("hPttrk_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  nbins_ass, pTmin_ass_[ipt], pTmax_ass_[ipt]);
-      hPhiTrk_ass_[ipt] = fTrkAssHist.make<TH1F>(Form("hPhitrk_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hPhiTrk_ass_[ipt] = fTrkAssHist.make<TH1F>(Form("hPhitrk_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  640, -3.2, 3.2);
-      hMultTrk_ass_[ipt] = fTrkAssHist.make<TH1I>(Form("hMulttrk_ass_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hMultTrk_ass_[ipt] = fTrkAssHist.make<TH1I>(Form("hMulttrk_ass_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  1000, 0, 50000);
    }*/
    TFileDirectory fTrkCorrAssHist  = fs->mkdir("AssTracksCorr");
    /*
-   hEtaTrk_corr_ass_.resize(pTmin_ass_.size()); 
-   hPtTrk_corr_ass_.resize(pTmin_ass_.size()); 
-   hPhiTrk_corr_ass_.resize(pTmin_ass_.size()); 
-   hMultTrk_corr_ass_.resize(pTmin_ass_.size()); 
+   hEtaTrk_corr_ass_.resize(pTmin_ass_.size());
+   hPtTrk_corr_ass_.resize(pTmin_ass_.size());
+   hPhiTrk_corr_ass_.resize(pTmin_ass_.size());
+   hMultTrk_corr_ass_.resize(pTmin_ass_.size());
    for(unsigned int ipt = 0; ipt < pTmin_ass_.size(); ++ipt)
    {
       //bin size for some plots
       int nbins_ass = static_cast<int>((pTmax_ass_[ipt]-pTmin_ass_[ipt])/0.01);
 
-      hEtaTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hEtatrk_corr_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hEtaTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hEtatrk_corr_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  300, -3., 3.);
-      hPtTrk_corr_ass_[ipt]  = fTrkCorrAssHist.make<TH1F>(Form("hPttrk_corr_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hPtTrk_corr_ass_[ipt]  = fTrkCorrAssHist.make<TH1F>(Form("hPttrk_corr_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  nbins_ass, pTmin_ass_[ipt], pTmax_ass_[ipt]);
-      hPhiTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hPhitrk_corr_ass_%d",ipt), 
-                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hPhiTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hPhitrk_corr_ass_%d",ipt),
+                                                 Form("%1.1f<$p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  640, -3.2, 3.2);
-      hMultTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hMulttrk_corr_ass_%d",ipt), 
-                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]), 
+      hMultTrk_corr_ass_[ipt] = fTrkCorrAssHist.make<TH1F>(Form("hMulttrk_corr_ass_%d",ipt),
+                                                 Form("%1.1f<p_{T}<%1.1f GeV/c", pTmin_ass_[ipt], pTmax_ass_[ipt]),
                                                  1000, 0, 50000);
    }*/
 
@@ -243,10 +244,12 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
    /*
    hEtaCTow_ = fCTowHist.make<TH1F>("hEtatow", "", 120, -6.,   6.);
    hEtCTow_  = fCTowHist.make<TH1F>("hEttow",  "", 100,  0.,  10.);*/
-   hPhiCTow_ = fCTowHist.make<TH1F>("hPhitow", "", 640, -3.2,  3.2);
+   //hPhiCTow_ = fCTowHist.make<TH1F>("hPhitow", "", 640, -3.2,  3.2);
 
    double etaW = (etamax_trg_ - etamin_ass_ - etamin_trg_ + etamax_ass_) / nEtaBins_;
+   //double etaW = 0.0;
    double phiW = 2.0*(TMath::Pi())/nPhiBins_;
+   //double phiW = 0.0;
 
    TFileDirectory fSignalHist      = fs->mkdir("Signal");
    hSignal_.resize(pTmin_trg_.size());
@@ -263,14 +266,14 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
        //hSignalMP_[itrg].resize(pTmin_ass_.size());
        for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
        {
-          if( itrg < jass ) continue; 
+          if( itrg < jass ) continue;
           hSignal_[itrg][jass] = fSignalHist.make<TH2D>(Form("signal_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
           pTmin_trg_[itrg], pTmax_trg_[itrg],
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -281,7 +284,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -291,7 +294,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -301,7 +304,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -311,7 +314,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
@@ -333,14 +336,14 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
        //hBackgroundMP_[itrg].resize(pTmin_ass_.size());
        for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
        {
-          if( itrg < jass ) continue; 
+          if( itrg < jass ) continue;
           hBackground_[itrg][jass] = fBackgroundHist.make<TH2D>(Form("background_trg%d_ass%d", itrg, jass),
           Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
           pTmin_trg_[itrg], pTmax_trg_[itrg],
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -351,7 +354,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -361,7 +364,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -371,7 +374,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -381,57 +384,58 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
           pTmin_trg_[jass], pTmax_trg_[jass]),
           nEtaBins_ + 1,
           etamin_trg_ - etamax_ass_ - etaW/2.,
-          etamax_trg_ - etamin_ass_ + etaW/2.,                    
+          etamax_trg_ - etamin_ass_ + etaW/2.,
           nPhiBins_ - 1,
           -( TMath::Pi() - phiW ) / 2.0,
            ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
        }
    }
    TFileDirectory fCorrelationHist = fs->mkdir("Correlation");
-   //hCorrelation_.resize(pTmin_trg_.size());
+   hCorrelation_.resize(pTmin_trg_.size());
    //hCorrelationPP_.resize(pTmin_trg_.size());
    //hCorrelationMM_.resize(pTmin_trg_.size());
    //hCorrelationPM_.resize(pTmin_trg_.size());
    //hCorrelationMP_.resize(pTmin_trg_.size());
-   //for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
-   //{
-   //  hCorrelation_[itrg].resize(pTmin_ass_.size());
+   for(unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++)
+     {
+       hCorrelation_[itrg].resize(pTmin_ass_.size());
        //hCorrelationPP_[itrg].resize(pTmin_ass_.size());
        //hCorrelationMM_[itrg].resize(pTmin_ass_.size());
        //hCorrelationPM_[itrg].resize(pTmin_ass_.size());
        //hCorrelationMP_[itrg].resize(pTmin_ass_.size());
-   //  for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
-   //   {
-   //     if( itrg < jass ) continue; 
-   /*  
-   hCorrelation_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_trg%d_ass%d", itrg, jass),
-          Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
-               pTmin_trg_[itrg], pTmax_trg_[itrg],
+       for(unsigned int jass = 0; jass < pTmin_ass_.size(); jass++)
+	 {
+	   if( itrg < jass ) continue;
+	   
+	   hCorrelation_[itrg][jass] = 
+	     fCorrelationHist.make<TH2D>(Form("corr_trg%d_ass%d", itrg, jass),
+					 Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
+					      pTmin_trg_[itrg], pTmax_trg_[itrg],
+					      pTmin_trg_[jass], pTmax_trg_[jass]),
+					 nEtaBins_ + 1,
+					 etamin_trg_ - etamax_ass_ - etaW/2.,
+					 etamax_trg_ - etamin_ass_ + etaW/2.,
+					 nPhiBins_ - 1,
+					 -( TMath::Pi() - phiW ) / 2.0,
+					 ( TMath::Pi() * 3.0 - phiW) / 2.0);
+	   /*
+	     hCorrelationPP_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_pp_trg%d_ass%d", itrg, jass),
+	     Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
+	     pTmin_trg_[itrg], pTmax_trg_[itrg],
+	     pTmin_trg_[jass], pTmax_trg_[jass]),
+	     nEtaBins_ + 1,
+	     etamin_trg_ - etamax_ass_ - etaW/2.,
+	     etamax_trg_ - etamin_ass_ + etaW/2.,
+	     nPhiBins_ - 1,
+	     -( TMath::Pi() - phiW ) / 2.0,
+	     ( TMath::Pi() * 3.0 - phiW) / 2.0);
+	     hCorrelationMM_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_mm_trg%d_ass%d", itrg, jass),
+	     Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
+	     pTmin_trg_[itrg], pTmax_trg_[itrg],
                pTmin_trg_[jass], pTmax_trg_[jass]),
                nEtaBins_ + 1,
                etamin_trg_ - etamax_ass_ - etaW/2.,
-               etamax_trg_ - etamin_ass_ + etaW/2.,                    
-               nPhiBins_ - 1,
-               -( TMath::Pi() - phiW ) / 2.0,
-	       ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
-          /*
-          hCorrelationPP_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_pp_trg%d_ass%d", itrg, jass),
-          Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
-               pTmin_trg_[itrg], pTmax_trg_[itrg],
-               pTmin_trg_[jass], pTmax_trg_[jass]),
-               nEtaBins_ + 1,
-               etamin_trg_ - etamax_ass_ - etaW/2.,
-               etamax_trg_ - etamin_ass_ + etaW/2.,                    
-               nPhiBins_ - 1,
-               -( TMath::Pi() - phiW ) / 2.0,
-                ( TMath::Pi() * 3.0 - phiW) / 2.0);
-          hCorrelationMM_[itrg][jass] = fCorrelationHist.make<TH2D>(Form("corr_mm_trg%d_ass%d", itrg, jass),
-          Form("%1.1f<p_{T}^{trg}<%1.1f GeV/c, %1.1f<p_{T}^{ass}<%1.1f GeV/c;#Delta#eta;#Delta#phi",
-               pTmin_trg_[itrg], pTmax_trg_[itrg],
-               pTmin_trg_[jass], pTmax_trg_[jass]),
-               nEtaBins_ + 1,
-               etamin_trg_ - etamax_ass_ - etaW/2.,
-               etamax_trg_ - etamin_ass_ + etaW/2.,                    
+               etamax_trg_ - etamin_ass_ + etaW/2.,
                nPhiBins_ - 1,
                -( TMath::Pi() - phiW ) / 2.0,
                 ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -441,7 +445,7 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                pTmin_trg_[jass], pTmax_trg_[jass]),
                nEtaBins_ + 1,
                etamin_trg_ - etamax_ass_ - etaW/2.,
-               etamax_trg_ - etamin_ass_ + etaW/2.,                    
+               etamax_trg_ - etamin_ass_ + etaW/2.,
                nPhiBins_ - 1,
                -( TMath::Pi() - phiW ) / 2.0,
                 ( TMath::Pi() * 3.0 - phiW) / 2.0);
@@ -451,17 +455,17 @@ ChargeDepAndPtCorr::ChargeDepAndPtCorr(const edm::ParameterSet& iConfig) :
                pTmin_trg_[jass], pTmax_trg_[jass]),
                nEtaBins_ + 1,
                etamin_trg_ - etamax_ass_ - etaW/2.,
-               etamax_trg_ - etamin_ass_ + etaW/2.,                    
+               etamax_trg_ - etamin_ass_ + etaW/2.,
                nPhiBins_ - 1,
                -( TMath::Pi() - phiW ) / 2.0,
                 ( TMath::Pi() * 3.0 - phiW) / 2.0);*/
-   //}
-   //}
+	 }
+     }
 }
 
 ChargeDepAndPtCorr::~ChargeDepAndPtCorr()
 {
- 
+
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
    delete evt_;
@@ -495,10 +499,10 @@ ChargeDepAndPtCorr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    // Get vertex collection by token
    edm::Handle< reco::VertexCollection > vertices;
    iEvent.getByToken(vtxTags_, vertices);
-   if( !vertices->size() ) 
-   { 
+   if( !vertices->size() )
+   {
       edm::LogWarning ("Missing Collection") <<"Invalid or empty vertex collection!";
-      return; 
+      return;
    }
 
    nVtx_ = 0; // N valid vertex in collection
@@ -506,8 +510,8 @@ ChargeDepAndPtCorr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    yBestVtx_   = -999.; //Best Y vtx coordinates
    zBestVtx_   = -999.; //Best Z vtx coordinates
    rhoBestVtx_ = -999.; //Best transverse vtx coordinates
-   xBestVtxError_ = -999.; //Best X vtx error 
-   yBestVtxError_ = -999.; //Best Y vtx error 
+   xBestVtxError_ = -999.; //Best X vtx error
+   yBestVtxError_ = -999.; //Best Y vtx error
    zBestVtxError_ = -999.; //Best Z vtx error
 
    // Loop over vertices
@@ -524,27 +528,28 @@ ChargeDepAndPtCorr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    {
       case 0:
          evtclass = centBin/2;
-         if(evtclass < centmin_ || evtclass >= centmax_) 
-           return; 
+         if(evtclass < centmin_ || evtclass >= centmax_)
+           return;
          break;
       case 1:
          evtclass = noff;
-         if(evtclass < noffmin_ || evtclass >= noffmax_) 
-           return; 
+         if(evtclass < noffmin_ || evtclass >= noffmax_)
+           return;
       default:
-         evtclass = -1; 
+         evtclass = -1;
    }
    //hCent_->Fill(centBin);
    //hNoff_->Fill(noff);
 
-   nTrkTot_trg_      = 0; 
-   nTrkTot_corr_trg_ = 0; 
-   nTrkTot_ass_      = 0; 
-   nTrkTot_corr_ass_ = 0; 
-   nTrk_trg_      = std::vector<int>(pTmin_trg_.size(), 0.); 
-   nTrk_corr_trg_ = std::vector<double>(pTmin_trg_.size(), 0.); 
-   nTrk_ass_      = std::vector<int>(pTmin_ass_.size(), 0.); 
-   nTrk_corr_ass_ = std::vector<double>(pTmin_ass_.size(), 0.); 
+   nTrkTot_trg_      = 0;
+   nTrkTot_corr_trg_ = 0;
+   nTrkTot_ass_      = 0;
+   nTrkTot_corr_ass_ = 0;
+   nTrk_trg_      = std::vector<int>(pTmin_trg_.size(), 0.);
+   nTrk_corr_trg_ = std::vector<double>(pTmin_trg_.size(), 0.);
+   nTrk_ass_      = std::vector<int>(pTmin_ass_.size(), 0.);
+   nTrk_corr_ass_ = std::vector<double>(pTmin_ass_.size(), 0.);
+
 
    // ----- Track selection -----
    LoopTracks(iEvent, iSetup, true,  evtclass); //trigger tracks
@@ -566,20 +571,23 @@ ChargeDepAndPtCorr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 
 // ------------ method called once each job just before starting event loop  ------------
-void 
+void
 ChargeDepAndPtCorr::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
-ChargeDepAndPtCorr::endJob() 
+void
+ChargeDepAndPtCorr::endJob()
 {
    std::cout<< "Start sorting the events!" << std::endl;
    std::sort(evtVec_.begin(),evtVec_.end());
    std::cout<< "Finish sorting the events!" << std::endl;
 
-   std::cout<< "Total of " << evtVec_.size() << " events are selected!" << std::endl;   
+   std::cout<< "Total of " << evtVec_.size() << " events are selected!" << std::endl;
+
+   //int long Nmix=0; //Claude
+   //int long NTrue=0; //Claude
 
    std::cout<< "Start running correlation analysis!" << std::endl;
    for( unsigned int i = 0; i < evtVec_.size(); i++ )
@@ -587,10 +595,13 @@ ChargeDepAndPtCorr::endJob()
       if( i % 100 == 0 ) std::cout << "Processing " << i << "th event" << std::endl;
       //std::cout<<"Signal event :  " << i << std::endl<<std::endl<<std::endl;
       FillHistsSignal( i );
+      //NTrue++;
       hCounts_->AddBinContent(1);
-
       unsigned int mixstart = i - bkgFactor_/2;
       unsigned int mixend   = i + bkgFactor_/2 + 1;
+
+      //unsigned int mixstart = i - bkgFactor_;
+      //unsigned int mixend   = i + bkgFactor_ + 1;
 
       //int Nmix=0;
 
@@ -605,25 +616,30 @@ ChargeDepAndPtCorr::endJob()
          mixend   = evtVec_.size();
       }
 
-      if( mixend > evtVec_.size() ) 
+      if( mixend > evtVec_.size() )
          mixend = evtVec_.size();
 
       for( unsigned int j = mixstart; j < mixend; j++ )
       {
           if(i == j) continue;
           //if(Nmix >= 10) continue;
+	  //if(Nmix >= 5) continue;
+	  
           //std::cout << i << " : " << j << std::endl;
           double deltazvtx = evtVec_[i].zvtx-evtVec_[j].zvtx;
           if(fabs(deltazvtx) > 2.0) continue;
-          
+	  //if(fabs(deltazvtx) > 0.5) continue;
+
           FillHistsBackground( i, j );
 	  //Nmix++;
 	  hCounts_->AddBinContent(2);
       }
     }
+   
+
     std::cout<< "Finish running correlation analysis!" << std::endl;
 
-    //NormalizeHists();
+    NormalizeHists();
     //std::cout<< "Finish normalizing the histograms!" << std::endl;
 }
 
@@ -639,8 +655,8 @@ ChargeDepAndPtCorr::fillDescriptions(edm::ConfigurationDescriptions& description
 
 //=========================================================================================
 
-void 
-ChargeDepAndPtCorr::LoopVertices(const edm::Event& iEvent, 
+void
+ChargeDepAndPtCorr::LoopVertices(const edm::Event& iEvent,
                                  const edm::EventSetup& iSetup)
 {
 
@@ -681,22 +697,22 @@ ChargeDepAndPtCorr::LoopVertices(const edm::Event& iEvent,
             double xVtxError = itVtx->xError();
             double yVtxError = itVtx->yError();
             double zVtxError = itVtx->zError();
-            // Radial vertex position                                                         
+            // Radial vertex position
             double rho = sqrt(xVtx*xVtx + yVtx*yVtx);
             // Increase N valid vertex in the collection
             ++nVtx_;
 
-            //Get the first vertex as the best one (greatest sum p_{T}^{2}) 
+            //Get the first vertex as the best one (greatest sum p_{T}^{2})
             if( itVtx == recoVertices.begin() )
             {
-                xBestVtx_ = xVtx; 
-                yBestVtx_ = yVtx; 
-                zBestVtx_ = zVtx; 
-                xBestVtxError_ = xVtxError; 
-                yBestVtxError_ = yVtxError; 
+                xBestVtx_ = xVtx;
+                yBestVtx_ = yVtx;
+                zBestVtx_ = zVtx;
+                xBestVtxError_ = xVtxError;
+                yBestVtxError_ = yVtxError;
                 zBestVtxError_ = zVtxError;
 
-                rhoBestVtx_ = rho; 
+                rhoBestVtx_ = rho;
             }
         }
    }
@@ -710,8 +726,8 @@ ChargeDepAndPtCorr::LoopVertices(const edm::Event& iEvent,
 
 //=========================================================================================
 
-double 
-ChargeDepAndPtCorr::LoopNoff(const edm::Event& iEvent, 
+double
+ChargeDepAndPtCorr::LoopNoff(const edm::Event& iEvent,
                              const edm::EventSetup& iSetup)
 {
    double noff = 0.;
@@ -742,13 +758,14 @@ ChargeDepAndPtCorr::LoopNoff(const edm::Event& iEvent,
        double pt     = itTrk->pt();
        int charge = itTrk->charge();
 
+
        // Select track based on quality
        if( !itTrk->quality(reco::TrackBase::highPurity) ) continue;
-       if( fabs(dzvtx / dzerror)   > 3.0 ) continue;
-       if( fabs(dxyvtx / dxyerror) > 3.0 ) continue;
-       if( fabs(pterror) / pt      > 0.1 ) continue;
-       if( pt <= 0.4 ) continue;
-       if( eta < -2.4 || eta > 2.4 ) continue;
+       if( fabs(dzvtx / dzerror)   > 2.0 ) continue;
+       if( fabs(dxyvtx / dxyerror) > 2.0 ) continue;
+       if( fabs(pterror) / pt      > 0.05 ) continue;
+       if( pt <= 0.3 ) continue;
+       if( eta < -2.0 || eta > 2.0 ) continue;
        if( charge == 0 ) continue;
 
        ++noff;
@@ -759,8 +776,8 @@ ChargeDepAndPtCorr::LoopNoff(const edm::Event& iEvent,
 
 //=========================================================================================
 
-void 
-ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+void
+ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup,
                                bool istrg, int evtclass)
 {
    // Get track collection by token
@@ -794,7 +811,7 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
        double nlayers = itTrk->hitPattern().trackerLayersWithMeasurement();
        chi2n = chi2n/nlayers;
        int nHits = itTrk->numberOfValidHits();
-       int algo  = itTrk->originalAlgo();        
+       int algo  = itTrk->originalAlgo();
 
        // Select track based on quality
        if( !itTrk->quality(reco::TrackBase::highPurity) ) continue;
@@ -803,9 +820,9 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
 
        if(isHI_ && isPix_ )
        {
-          bool goodpixtrk = false; // Pixel tracks specific cuts for 
+          bool goodpixtrk = false; // Pixel tracks specific cuts for
           if( pt <= pTmax_pix_         &&
-              nHits >= nhitsmin_pix_   && 
+              nHits >= nhitsmin_pix_   &&
               nHits <= nhitsmax_pix_   &&
               chi2n <= chi2nmax_pix_   &&
               fabs(dzvtx / dzerror) <  dzdzerror_pix_ )
@@ -839,7 +856,7 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
            if( fabs(dxyvtx / dxyerror) > d0dz0rror_ ) continue;
        }
        else
-       {       
+       {
            if( fabs(pterror) / pt      > pTerrorpT_ ) continue;
            if( fabs(dzvtx / dzerror)   > dzdzerror_ ) continue;
            if( fabs(dxyvtx / dxyerror) > d0dz0rror_ ) continue;
@@ -854,9 +871,10 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
 
        double eff = 1.0;
        if(cweight_) eff = GetEffWeight(eta, pt, evtclass);
+       //if(cweight_) eff = GetEffWeight(trigger, evtclass);
        AssignpTbins(pt, eta, phi, charge, eff, istrg, index);
 
-       hPhidist_->Fill(phi);
+       // hPhidist_->Fill(phi);
    }
 
    // Fill trk histograms
@@ -887,7 +905,7 @@ ChargeDepAndPtCorr::LoopTracks(const edm::Event& iEvent, const edm::EventSetup& 
 
 //=========================================================================================
 
-void 
+void
 ChargeDepAndPtCorr::LoopCaloTower(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    // Get calo tower collection by token
@@ -902,7 +920,7 @@ ChargeDepAndPtCorr::LoopCaloTower(const edm::Event& iEvent, const edm::EventSetu
    for( CaloTowerCollection::const_iterator itCTow = calotowers->begin();
         itCTow != calotowers->end();
         ++itCTow )
-   {    
+   {
        /*
        // Get eta, pt and phi of the calo tower
        double eta  = itCTow->eta();*/
@@ -921,7 +939,7 @@ ChargeDepAndPtCorr::LoopCaloTower(const edm::Event& iEvent, const edm::EventSetu
 
 //=========================================================================================
 
-double 
+double
 ChargeDepAndPtCorr::GetEffWeight(double eta, double pt, int evtclass)
 {
    double effweight = 1.0;
@@ -933,21 +951,37 @@ ChargeDepAndPtCorr::GetEffWeight(double eta, double pt, int evtclass)
    {
       int centIdx = 0;
       for(int icent = 0; icent < static_cast<int>(effCorrBinMin_.size()); ++icent)
-      {   
+      {
           if(evtclass >= effCorrBinMin_[icent] && evtclass < effCorrBinMax_[icent])
           {
              centIdx = icent;
              continue;
           }
       }
-      effweight = heff_[centIdx]->GetBinContent(heff_[centIdx]->FindBin(eta,pt));
+      //effweight = heff_[centIdx]->GetBinContent(heff_[centIdx]->FindBin(eta,pt));
+      effweight = heff_[centIdx]->GetBinContent(heff_[centIdx]->GetXaxis()->FindBin(eta), heff_[centIdx]->GetXaxis()->FindBin(pt));
    }
    return effweight;
-}
+   }
 
 //=========================================================================================
+/*double
+ChargeDepAndPtCorr::GetEffWeight(const TVector3 a, int evtclass)
+{
+   double effweight = 1.0;
 
-int 
+
+   for(int i_cf=0; i_cf < static_cast<int>(effCorrBinMin_.size()); i_cf++) if(evtclass >= effCorrBinMin_[i_cf]*2 && evtclass < effCorrBinMax_[i_cf]*2) {
+       effweight = heff_[i_cf]->GetBinContent(
+					      heff_[i_cf]->GetXaxis()->FindBin(a.Eta()),
+					      heff_[i_cf]->GetYaxis()->FindBin(a.Pt())
+					      );
+     }
+   return effweight;
+   }
+*/
+ //----------------------------------------------------
+int
 ChargeDepAndPtCorr::GetpTbin(double pt, bool istrg)
 {
     int idx = -1;
@@ -970,21 +1004,21 @@ ChargeDepAndPtCorr::GetpTbin(double pt, bool istrg)
 
     return idx;
 }
-
 //=========================================================================================
-
 void
-ChargeDepAndPtCorr::AssignpTbins(double pt,  double eta, 
-                                 double phi, int charge, 
+ChargeDepAndPtCorr::AssignpTbins(double pt,  double eta,
+                                 double phi, int charge,
                                  double eff, bool istrg,
                                  int idx)
 {
-    TLorentzVector pvector;
-    pvector.SetPtEtaPhiM(pt, eta, phi, 0.140);
+  TLorentzVector pvector;
+  pvector.SetPtEtaPhiM(pt, eta, phi, 0.140);
+  //TVector3 pvector; 
+  //pvector.SetPtEtaPhiM(pt, eta, phi);
 
     if(istrg)
-    { 
-      if(charge > 0)
+    {
+      if(charge < 0)
        {
            //hPtTrk_trg_[idx] ->Fill(pt);
            //hEtaTrk_trg_[idx]->Fill(eta);
@@ -995,11 +1029,11 @@ ChargeDepAndPtCorr::AssignpTbins(double pt,  double eta,
            (evt_->pVect_trg[idx]).push_back(pvector);
            (evt_->chgVect_trg[idx]).push_back(charge);
            (evt_->effVect_trg[idx]).push_back(eff);
-           nTrkTot_trg_++; 
+           nTrkTot_trg_++;
            nTrkTot_corr_trg_ += 1.0/eff;
-           nTrk_trg_[idx]++; 
+           nTrk_trg_[idx]++;
            nTrk_corr_trg_[idx] += 1.0/eff;
-         
+
        }
     }
     else
@@ -1016,33 +1050,59 @@ ChargeDepAndPtCorr::AssignpTbins(double pt,  double eta,
            (evt_->pVect_ass[idx]).push_back(pvector);
            (evt_->chgVect_ass[idx]).push_back(charge);
            (evt_->effVect_ass[idx]).push_back(eff);
-           nTrkTot_ass_++; 
+           nTrkTot_ass_++;
            nTrkTot_corr_ass_ += 1.0/eff;
-           nTrk_ass_[idx]++; 
-           nTrk_corr_ass_[idx] += 1.0/eff;        
+           nTrk_ass_[idx]++;
+           nTrk_corr_ass_[idx] += 1.0/eff;
 	   }
     }
 }
 
-double 
+double
 ChargeDepAndPtCorr::GetDeltaEta(double eta_trg, double eta_ass)
 {
-   double deltaEta = eta_ass - eta_trg;
+  double deltaEta = eta_ass - eta_trg;
+  //double deltaEta = eta_trg - eta_ass;
    return deltaEta;
 }
 
-double 
+double
 ChargeDepAndPtCorr::GetDeltaPhi(double phi_trg, double phi_ass)
-{     
-   double deltaPhi = phi_ass - phi_trg;
+{
+  //double deltaPhi = phi_trg - phi_ass;
+  double deltaPhi = phi_ass - phi_trg;
 
    if(deltaPhi > 1.5*TMath::Pi())
-      deltaPhi = deltaPhi - 2.0*TMath::Pi();
+    deltaPhi = deltaPhi - 2.0*TMath::Pi();
 
    else if(deltaPhi < -1.0*TMath::Pi() / 2.0)
-     deltaPhi = deltaPhi + 2.0*TMath::Pi();
+   deltaPhi = deltaPhi + 2.0*TMath::Pi();
 
    return deltaPhi;
+
+}
+
+double  ChargeDepAndPtCorr::GetDPhiStar(double phi1, double pt1, int charge1, double phi2, double pt2, int charge2, double radius, double bSign)
+{
+  // calculates dphistar
+  double dphistar = phi1 - phi2 - charge1*bSign*TMath::ASin(0.003*radius / pt1) + charge2*bSign*TMath::ASin(0.003*radius / pt2);
+
+  static const double kPi = TMath::Pi();
+
+  /*
+  if (dphistar > 1.5 * kPi)
+    dphistar = dphistar - 2.0*kPi;
+  else if (dphistar < -0.5 * kPi)
+    dphistar = dphistar + 2.0*kPi;*/
+
+  if (dphistar > kPi)
+    dphistar = kPi * 2.0 - dphistar;
+  if (dphistar < -kPi)
+    dphistar = -kPi * 2.0 - dphistar;
+  if (dphistar > kPi) // might look funny but is needed
+    dphistar = kPi * 2.0 - dphistar;
+
+  return dphistar;
 }
 
 void
@@ -1057,46 +1117,42 @@ ChargeDepAndPtCorr::FillHistsSignal(int ievt)
       unsigned int ntrgsize = evtVec_[ievt].pVect_trg[itrg].size();
       unsigned int nasssize = evtVec_[ievt].pVect_ass[jass].size();
       //double nMult_corr_trg = evtVec_[ievt].nMultCorrVect_trg[itrg];
-      	
+
       for( unsigned int ntrg = 0; ntrg < ntrgsize; ntrg++ )
       {
-          TLorentzVector pvector_trg = (evtVec_[ievt].pVect_trg[itrg])[ntrg];      
-          double effweight_trg = (evtVec_[ievt].effVect_trg[itrg])[ntrg];
-          int chg_trg = (evtVec_[ievt].chgVect_trg[itrg])[ntrg];
-          double eta_trg = pvector_trg.Eta();
-          double phi_trg = pvector_trg.Phi();
-          double pt_trg  = pvector_trg.Pt();
-          //std::cout<<"Effweight trigger :   " << effweight_trg << std::endl;
-
-          for( unsigned int nass = 0; nass < nasssize; nass++ )
+	TLorentzVector pvector_trg = (evtVec_[ievt].pVect_trg[itrg])[ntrg];
+	double effweight_trg = (evtVec_[ievt].effVect_trg[itrg])[ntrg];
+	int chg_trg = (evtVec_[ievt].chgVect_trg[itrg])[ntrg];
+	double eta_trg = pvector_trg.Eta();
+	double phi_trg = pvector_trg.Phi();
+	double pt_trg  = pvector_trg.Pt();
+	//std::cout<<"Effweight trigger :   " << effweight_trg << std::endl;
+	
+	for( unsigned int nass = 0; nass < nasssize; nass++ )
           {
-              TLorentzVector pvector_ass = (evtVec_[ievt].pVect_ass[jass])[nass];   
-              double effweight_ass = (evtVec_[ievt].effVect_ass[jass])[nass];
-	      int chg_ass = (evtVec_[ievt].chgVect_ass[jass])[nass];
-              double eta_ass = pvector_ass.Eta();
-              double phi_ass = pvector_ass.Phi();
-              double pt_ass  = pvector_ass.Pt();
-
-              double deltaPhi = GetDeltaPhi(phi_trg, phi_ass);
-              double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
-
-              double deltaEta = GetDeltaEta(eta_trg, eta_ass);
-
-              //Skip the loop when trg, ass particles are the same
-              
-              if( deltaEta == 0.0  &&  deltaPhi == 0.0 && pt_trg==pt_ass) continue;
-              //if (pt_trg  < pt_ass) continue;
-
-              //Total weight
-              double effweight = effweight_trg * effweight_ass;
-	      //double effweight = 1.0;
-	      
+	    TLorentzVector pvector_ass = (evtVec_[ievt].pVect_ass[jass])[nass];
+	    double effweight_ass = (evtVec_[ievt].effVect_ass[jass])[nass];
+	    int chg_ass = (evtVec_[ievt].chgVect_ass[jass])[nass];
+	    double eta_ass = pvector_ass.Eta();
+	    double phi_ass = pvector_ass.Phi();
+	    double pt_ass  = pvector_ass.Pt();
 	    
-	      // std::cout<<"Effweight associate :  "<<effweight_ass << std::endl;
-              //Fill and symmetrize the distribution
-	      if(chg_trg > 0 && chg_ass > 0)
-	      {
-		  
+	    double deltaPhi = GetDeltaPhi(phi_trg, phi_ass);
+	    double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
+	    double deltaEta = GetDeltaEta(eta_trg, eta_ass);
+	    
+	    //Skip the loop when trg, ass particles are the same
+	    if( deltaEta == 0.0  &&  deltaPhi == 0.0 && deltaPhi2 ==0.0 && pt_trg==pt_ass) continue;
+	    //if (pt_trg  < pt_ass) continue;
+	    
+	    //Total weight
+	    double effweight = effweight_trg * effweight_ass;
+	    //double effweight = 1.0;
+	    
+	    //Fill and symmetrize the distribution
+	    if(chg_trg < 0 && chg_ass > 0)
+      	      {
+		
 		hSignal_[itrg][jass]->Fill( fabs(deltaEta),
 					    deltaPhi,
 					    1.0/4.0/effweight );
@@ -1109,17 +1165,19 @@ ChargeDepAndPtCorr::FillHistsSignal(int ievt)
 		hSignal_[itrg][jass]->Fill(-fabs(deltaEta),
 					   deltaPhi2,
 					   1.0/4.0/effweight );
-	      }
-          }
+		
+		//hSignal_[itrg][jass]->Fill( deltaEta, deltaPhi, 1.0/effweight );
+      	      }
+	  }
       }
     }
   }
 }
 
-void 
+void
 ChargeDepAndPtCorr::FillHistsBackground(int ievt_trg, int jevt_ass)
 {
-  if( evtVec_[ievt_trg].run ==  evtVec_[jevt_ass].run &&  
+  if( evtVec_[ievt_trg].run ==  evtVec_[jevt_ass].run &&
       evtVec_[ievt_trg].event == evtVec_[jevt_ass].event )
   {
       std::cout << "Event are the same. Skipping it" << std::endl;
@@ -1135,53 +1193,52 @@ ChargeDepAndPtCorr::FillHistsBackground(int ievt_trg, int jevt_ass)
           unsigned int ntrgsize = evtVec_[ievt_trg].pVect_trg[itrg].size();
           unsigned int nasssize = evtVec_[jevt_ass].pVect_ass[jass].size();
           //double nMult_corr_trg = evtVec_[ievt_trg].nMultCorrVect_trg[itrg];
-	  
+
           for( unsigned int ntrg = 0; ntrg < ntrgsize; ntrg++ )
           {
-              TLorentzVector pvector_trg = (evtVec_[ievt_trg].pVect_trg[itrg])[ntrg];      
-              double effweight_trg = (evtVec_[ievt_trg].effVect_trg[itrg])[ntrg];
-	      int chg_trg = (evtVec_[ievt_trg].chgVect_trg[itrg])[ntrg];
-              double eta_trg = pvector_trg.Eta();
-              double phi_trg = pvector_trg.Phi();
-              double pt_trg  = pvector_trg.Pt();
-	      //std::cout<<"Effweight trigger    " << effweight_trg<<std::endl;
-              for( unsigned int nass = 0; nass < nasssize; nass++ )
+	    TLorentzVector pvector_trg = (evtVec_[ievt_trg].pVect_trg[itrg])[ntrg];
+	    double effweight_trg = (evtVec_[ievt_trg].effVect_trg[itrg])[ntrg];
+	    int chg_trg = (evtVec_[ievt_trg].chgVect_trg[itrg])[ntrg];
+	    double eta_trg = pvector_trg.Eta();
+	    double phi_trg = pvector_trg.Phi();
+	    double pt_trg  = pvector_trg.Pt();
+	    //std::cout<<"Effweight trigger    " << effweight_trg<<std::endl;
+	    for( unsigned int nass = 0; nass < nasssize; nass++ )
               {
-                  TLorentzVector pvector_ass = (evtVec_[jevt_ass].pVect_ass[jass])[nass];   
-                  double effweight_ass = (evtVec_[jevt_ass].effVect_ass[jass])[nass];
-		  int chg_ass = (evtVec_[jevt_ass].chgVect_ass[jass])[nass];
-                  double eta_ass = pvector_ass.Eta();
-                  double phi_ass = pvector_ass.Phi();
-                  double pt_ass  = pvector_ass.Pt();
-
-                  double deltaPhi = GetDeltaPhi( phi_trg, phi_ass );
-                  double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
-                  double deltaEta = GetDeltaEta( eta_trg, eta_ass );
-		                    
-                  if( deltaEta == 0.0  &&  deltaPhi == 0.0 && pt_trg==pt_ass) continue;
-                  //if (pt_trg  < pt_ass) continue;
-                  
-                  //Total weight
-                  double effweight = effweight_trg * effweight_ass;
-		  //double effweight = 1.0;
-		  
-		  //		  std::cout<<"Effweight associate   "<< effweight_ass<<std::endl;
-                  //Fill and symmetrize the distribution
-                  if(chg_trg > 0 && chg_ass > 0)
-		    {
-		      
-                      hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
-                      hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
-                      hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight );
-                      hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight );
-		    }    
+		TLorentzVector pvector_ass = (evtVec_[jevt_ass].pVect_ass[jass])[nass];
+		double effweight_ass = (evtVec_[jevt_ass].effVect_ass[jass])[nass];
+		int chg_ass = (evtVec_[jevt_ass].chgVect_ass[jass])[nass];
+		double eta_ass = pvector_ass.Eta();
+		double phi_ass = pvector_ass.Phi();
+		double pt_ass  = pvector_ass.Pt();
+		
+		double deltaPhi = GetDeltaPhi( phi_trg, phi_ass );
+		double deltaPhi2 = GetDeltaPhi(phi_ass, phi_trg);
+		double deltaEta = GetDeltaEta( eta_trg, eta_ass );
+		
+		if( deltaEta == 0.0  &&  deltaPhi == 0.0 && deltaPhi2 && pt_trg==pt_ass) continue;
+		//if (pt_trg  < pt_ass) continue;
+		
+		//Total weight
+		double effweight = effweight_trg * effweight_ass;
+		//double effweight = 1.0;
+		
+		//`Fill and symmetrize the distribution
+		if(chg_trg < 0 && chg_ass > 0)
+		  {
+		    hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
+		    hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi, 1.0/4.0/effweight );
+		    hBackground_[itrg][jass]->Fill( fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight );
+		    hBackground_[itrg][jass]->Fill(-fabs(deltaEta), deltaPhi2, 1.0/4.0/effweight ); 
+		    //hBackground_[itrg][jass]->Fill( deltaEta, deltaPhi, 1.0/effweight );
+		  }
 	      }
           }
       }
   }
 }
 
-/*void
+void
   ChargeDepAndPtCorr::NormalizeHists()
 {
   for( unsigned int itrg = 0; itrg < pTmin_trg_.size(); itrg++ )
@@ -1190,22 +1247,25 @@ ChargeDepAndPtCorr::FillHistsBackground(int ievt_trg, int jevt_ass)
     {
       if(itrg < jass) continue;
 
-      if( hSignal_[itrg][jass]->Integral() != 0 && 
-          hBackground_[itrg][jass]->Integral() != 0 ) 
+      if( hSignal_[itrg][jass]->Integral() != 0 &&
+          hBackground_[itrg][jass]->Integral() != 0 )
       {
          double  etabinwidth = hSignal_[itrg][jass]->GetXaxis()->GetBinWidth(1);
          double  phibinwidth = hSignal_[itrg][jass]->GetYaxis()->GetBinWidth(1);
- 
-         hSignal_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
-         hBackground_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
+
+         //hSignal_[itrg][jass]    ->Scale(1.0/etabinwidth/phibinwidth);
+         //hBackground_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
 
          hCorrelation_[itrg][jass]->Add(hSignal_[itrg][jass]);
          hCorrelation_[itrg][jass]->Divide(hBackground_[itrg][jass]);
-         hCorrelation_[itrg][jass]->Scale(hBackground_[itrg][jass]->GetBinContent(hBackground_[itrg][jass]->FindBin(0,0)));  
+         hCorrelation_[itrg][jass]->Scale(hBackground_[itrg][jass]->GetBinContent(hBackground_[itrg][jass]->FindBin(0,0)));
+
+	 hCorrelation_[itrg][jass]->Scale(1.0/etabinwidth/phibinwidth);
+	 
       }
     }
   }
-  }*/
+}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(ChargeDepAndPtCorr);
